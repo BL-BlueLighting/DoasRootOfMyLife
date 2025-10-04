@@ -1,82 +1,90 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>doas -su mylife.root</title>
-  <style>
-    :root{
-      --bg:#0b0f14;
-      --panel:#0f1620;
-      --text:#e6eef6;
-      --muted:#9fb0c8;
-    }
-    html,body{
-      height:100%;
-      margin:0;
-      font-family:ui-monospace,Consolas,monospace;
-      background:var(--bg);
-      color:var(--text);
-    }
-    .terminal-wrap{
-      display:flex;
-      flex-direction:column;
-      height:100vh;
-      padding:16px;
-      box-sizing:border-box;
-    }
-    .term{
-      background:linear-gradient(180deg,#081017 0%, #0b1420 100%);
-      border-radius:8px;
-      flex:1;
-      display:flex;
-      flex-direction:column;
-      overflow:hidden;
-      box-shadow:0 6px 30px rgba(0,0,0,0.6);
-    }
-    .term-output{
-      flex:1;
-      padding:12px 14px;
-      overflow:auto;
-      white-space:pre-wrap;
-      font-size:13px;
-      line-height:1.4;
-    }
-    .term-input{
-      display:flex;
-      align-items:center;
-      padding:10px;
-      border-top:1px solid rgba(255,255,255,0.05);
-    }
-    .prompt{
-      padding-right:8px;
-      color:var(--muted);
-      min-width:60px;
-    }
-    input.cmdline{
-      flex:1;
-      background:transparent;
-      border:0;
-      outline:0;
-      color:var(--text);
-      font:inherit;
-      padding:6px;
-    }
-  </style>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>doas -su mylife.root - 章节选择</title>
+    <style>
+        /* 页面整体样式 */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* 卡片容器 */
+        .card {
+            background-color: rgba(0,0,0,0.6);
+            padding: 40px 60px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 2em;
+            letter-spacing: 1px;
+        }
+
+        p {
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            margin-bottom: 20px;
+        }
+
+        /* 渐变按钮风格 */
+        a {
+            display: inline-block;
+            text-decoration: none;
+            color: #fff;
+            background: linear-gradient(135deg, #ff7e5f, #feb47b);
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        a:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        /* 响应式字体 */
+        @media(max-width: 480px){
+            h1 { font-size: 1.5em; }
+            p { font-size: 1em; }
+            a { padding: 10px 20px; font-size: 0.95em; }
+        }
+    </style>
 </head>
+
 <body>
-  <div class="terminal-wrap">
-    <div class="term" id="term">
-      <!-- 输出区域 -->
-      <div class="term-output" id="output" role="log" aria-live="polite"></div>
-      <!-- 输入区域 -->
-      <div class="term-input">
-        <div class="prompt" id="prompt">root@humanos:~$</div>
-        <input id="cmdline" class="cmdline" autocomplete="off" spellcheck="false" autofocus />
-      </div>
+    <div class="card">
+        <h1>doas -su mylife.root</h1>
+        <p>章节选择</p>
+        <ul>
+            <li><a href="./chapters/first/chapter.html">序章 - 意外而来</a></li>
+            <li><a href="./chapters/second/chapter.html">第一章 - 探索空间 (未完成)</a></li>
+        </ul>
     </div>
-  </div>
-<script src="./base.js"></script>
-<script src="./commands.js"></script>
 </body>
 </html>

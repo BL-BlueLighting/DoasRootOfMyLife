@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>doas -su mylife.root - 序章</title>
+  <style>
+    :root{
+      --bg:#0b0f14;
+      --panel:#0f1620;
+      --text:#e6eef6;
+      --muted:#9fb0c8;
+    }
+    html,body{
+      height:100%;
+      margin:0;
+      font-family:ui-monospace,Consolas,monospace;
+      background:var(--bg);
+      color:var(--text);
+    }
+    .terminal-wrap{
+      display:flex;
+      flex-direction:column;
+      height:100vh;
+      padding:16px;
+      box-sizing:border-box;
+    }
+    .term{
+      background:linear-gradient(180deg,#081017 0%, #0b1420 100%);
+      border-radius:8px;
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+      box-shadow:0 6px 30px rgba(0,0,0,0.6);
+    }
+    .term-output{
+      flex:1;
+      padding:12px 14px;
+      overflow:auto;
+      white-space:pre-wrap;
+      font-size:13px;
+      line-height:1.4;
+    }
+    .term-input{
+      display:flex;
+      align-items:center;
+      padding:10px;
+      border-top:1px solid rgba(255,255,255,0.05);
+    }
+    .prompt{
+      padding-right:8px;
+      color:var(--muted);
+      min-width:60px;
+    }
+    input.cmdline{
+      flex:1;
+      background:transparent;
+      border:0;
+      outline:0;
+      color:var(--text);
+      font:inherit;
+      padding:6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="terminal-wrap">
+    <div class="term" id="term">
+      <!-- 输出区域 -->
+      <div class="term-output" id="output" role="log" aria-live="polite"></div>
+      <!-- 输入区域 -->
+      <div class="term-input">
+        <div class="prompt" id="prompt">root@humanos:~$</div>
+        <input id="cmdline" class="cmdline" autocomplete="off" spellcheck="false" autofocus />
+      </div>
+    </div>
+  </div>
+<script src="../../base.js"></script>
+<script src="./commands.js"></script>
+</body>
+</html>
