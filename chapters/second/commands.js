@@ -53,7 +53,7 @@ loadState();
 // 获取是否通关
 if (storyWhere != 6) {
     echoContent('-- 您还未通关序章，请通关后再来尝试。', false);
-    break; // 故意让它报错，不要修复它
+    cmdline.remove(); // cmdline 自爆
 }
 
 // 创建新存档
