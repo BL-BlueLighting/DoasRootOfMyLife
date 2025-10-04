@@ -72,8 +72,15 @@ if (storyWhere === 0) {
 
 newCommand("ls", [], function(api){
     // 列出当前目录下的文件
-    if(storyWhere === 0){
+    if(storyWhere >= 0){
         echoContent("README.txt", false);
+    }
+    else if (storyWhere >= 2) {
+        echoContent("sudoerofmyself", false);
+    }
+    else if (storyWhere > 2 && storyWhere === 201) {
+        echoContent("sudoerofmyself", false);
+        echoContent("sudoerofmyself.decrypt", false);
     }
     saveState();
 });
@@ -86,6 +93,14 @@ newCommand("cat", ["filename"], function(api){
         echoContent("老朋友，就只过这么一段时间，你应该没有忘记怎么用 CLI 吧？", false);
         echoContent("manAI 给你留下了一张纸条：", false);
         echoContent("    人，如果你看到这张纸条，说明你重新进来了 CLI 模式。\n    如果你来了，就用 manAI 叫我。", false);
+    }
+    else if (storyWhere > 2 && filename == "sudoerofmyself") {
+        storyWhere = 3;
+        echoContent("Li4uIC4uLSAtLi4uIC4uLiAtLi0uIC4tLiAuLiAtLi4uIC4gLyAtLi4uIC4tLi4gLi0uLS4tIC0uLi4gLi0uLiAuLi0gLiAuLS4uIC4uIC0tLiAuLi4uIC0gLi4gLS4gLS0uIC8gLS4tLS4gLi4tIC4uIC0uLiAtLS0uLi4gLi0tLS0gLi4uLi4gLi4uLS0gLi4uLi0gLS0tLi4gLi4uLi4gLi4tLS0gLi4uLS0gLS0tLi4gLS0tLi4gLS4tLS4tIC8gLS0tIC0uIC8gLS4uLiAuLiAuLS4uIC4uIC0uLi4gLi4gLi0uLiAuLiAtLi0uLS0gLyAuLSAtLiAtLi4gLS0uLi0tIC8gLi0tIC4uLi4gLiAuLS4gLiAvIC4uIC4uLiAvIC0tIC0uLS0gLyAuLi0gLi4gLS4uIC4uLS0uLg==");
+    }
+    else if (storyWhere === 201 && filename == "sudoerofmyself.decrypt") {
+        storyWhere = 3;
+        echoContent("... ..- -... ... -.-. .-. .. -... . / -... .-.. .-.-.- -... .-.. ..- . .-.. .. --. .... - .. -. --. / -.--. ..- .. -.. ---... .---- ..... ...-- ....- ---.. ..... ..--- ...-- ---.. ---.. -.--.- / --- -. / -... .. .-.. .. -... .. .-.. .. -.-.-- / .- -. -.. --..-- / .-- .... . .-. . / .. ... / -- -.-- / ..- .. -.. ..--..");
     }
     saveState();
 });
@@ -111,13 +126,31 @@ newCommand("manAI", [], function(api){
     }
     else if (storyWhere === 3501) { // 不给权限
         echoContent("(qwq) 好吧。");
-        echoContent("(awa) 这个懒人作者先去躺平了，目前不更新，也许明天再更。");
+        echoContent("(awa) 不知道谁在文件夹里留了一个文件，你去看看罢。");
         storyWhere = 2;
     }
     else if (storyWhere === 3502) { // 给权限
         echoContent("(✪ω✪) 谢谢！");
-        echoContent("(awa) 这个懒人作者先去躺平了，目前不更新，也许明天再更。");
-        storyWhere = 2;
+        echoContent("(awa) 不知道谁在文件夹里留了一个文件，表层是用 base64 解的，我有权限因此就帮你解了。");
+        storyWhere = 201;
+    }
+    else if (storyWhere === 4) {
+        echoContent("Σ(*ﾟдﾟﾉ)ﾉ 你这就获得了结果？？？");
+        echoContent("(〒︿〒) 太强了。");
+        echoContent("(awa) 看来我是没办法难住你了。");
+        echoContent("(qwq) 好吧，只能让作者来了。");
+        echoContent("||%&%$$#$#%&&**!@#$%^&*");
+        echoContent("/-/-////-/-//-/-/|//-///-/|///--/-|--/////------//---//---//////---////----////-----/");
+        storyWhere = 5;
+    }
+    else if (storyWhere === 501) {
+        echoContent("(q_q) 连作者都没有办法难住你吗。");
+        echoContent("(p_p) 我认输。");
+        storyWhere = 6;
+    }
+    else {
+        echoContent("(awa) 你也许还没有完成剩下的任务。");
+        echoContent("(awa) 先完成任务吧。");
     }
     saveState();
 });
@@ -167,4 +200,37 @@ newCommand("clear", [], function(api){
     output.innerHTML = "";
     echoContent('Welcome to HumanOS.', false);
     echoContent('Type [color: #0f0]help[/endcolor] to get started.', false);
+});
+
+// 解密，1534852388
+newCommand("1534852388", [], function(api){
+    if (storyWhere === 3) {
+        echoContent("如果你没有关注我赶紧关注😡");
+        echoContent("UNLOCKED - Status: Success");
+        echoContent("--------------------------");
+        echoContent("NEXT STORY - UNLOCKED FOR Y.");
+        storyWhere = 4;
+    }
+});
+
+// SPE: CHECKING
+newCommand("check", ["id:string"], function(api) {
+    if (storyWhere === 5) {
+        // 请求 check 服务器
+        const Http = new XMLHttpRequest();
+        const url='https://airoj.latingtude-studios.icu/trrrricks/checking.php';
+        Http.open("GET", url);
+        Http.send();
+
+        Http.onreadystatechange = (e) => {
+            if (Http.readyState == 4 && Http.status == 200) {
+                var content = JSON.stringify(Http.requestText);
+                if (content.status == true) {
+                    // 我去，这 b 通过了
+                    storyWhere = 501;
+                    echoContent("YOU CLEARED DOOR OF doas -su mylife.root，话说你真的好闲啊。");
+                }
+            }
+        }
+    }
 });

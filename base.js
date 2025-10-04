@@ -41,6 +41,7 @@ let historyIndex = null;
 const context = { __vars: {} };
 let storyWhere = 0;
 let nextStory = false;
+let accessGiven = false;
 
 // 从 LocalStorage 恢复
 function loadState(){
@@ -52,6 +53,7 @@ function loadState(){
         if(data.variables) Object.assign(context.__vars, data.variables);
         if(typeof data.storyWhere === 'number') storyWhere = data.storyWhere;
         if(typeof data.nextStory === 'boolean') nextStory = data.nextStory;
+        if(typeof data.accessGiven === 'boolean') accessGiven = data.accessGiven;
         }catch(e){ console.warn('加载状态失败:', e); }
     }
 }
@@ -62,7 +64,8 @@ function saveState(){
         history: history.slice(),
         variables: Object.assign({}, context.__vars),
         storyWhere,
-        nextStory
+        nextStory,
+        accessGiven
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
