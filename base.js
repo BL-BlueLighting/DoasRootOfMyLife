@@ -17,6 +17,11 @@
     2025 / 10 / 04 14:43
 */
 
+console.log("doas -su mylife.root");
+console.log("    Base Framework Loaded.");
+console.log("        by BL.BlueLighting 2025");
+
+
 const output = document.getElementById('output');
 const cmdline = document.getElementById('cmdline');
 

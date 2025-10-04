@@ -13,6 +13,12 @@
 // This file depends on base.js
 // Make sure base.js is loaded before this file
 
+console.log("    Commands Loaded.");
+console.log("        by BL.BlueLighting 2025");
+console.log("©️ Copyright 2025 BL.BlueLighting. All Rights Reserved.");
+console.log("License: GPLv3");
+console.log("THANKS FOR YOUR PLAYING!");
+
 // 下面是 base.js 的相关内容，如果你需要二次开发可以参照
 /**
  * @typedef {Object} FrameworkAPIType
