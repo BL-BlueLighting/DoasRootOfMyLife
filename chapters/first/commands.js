@@ -70,10 +70,10 @@ newCommand('ls', [], function(api){
         echoContent("manfile.txt", false);
         nextStory = false;
     }
-    else if (storyWhere >= 3503) {
+    else if (storyWhere === 3503) {
         echoContent("config.dd", false);
     }
-    else if (storyWhere == 6) {
+    else if (storyWhere === 6) {
         echoContent("freedom.txt", false);
     }
 })
