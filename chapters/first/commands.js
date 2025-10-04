@@ -378,3 +378,11 @@ newCommand('reboot', [], function(api){
     }
     saveState();
 })
+
+// clear
+newCommand("clear", [], function(api){
+    // 清空输出
+    output.innerHTML = "";
+    echoContent('Welcome to HumanOS.', false);
+    echoContent('Type [color: #0f0]help[/endcolor] to get started.', false);
+});
