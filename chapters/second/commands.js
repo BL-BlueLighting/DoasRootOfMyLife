@@ -45,3 +45,11 @@ const api = window.FrameworkAPI;
 if(!api) throw new Error('FrameworkAPI is not available. Make sure base.js is loaded before commands.js');
 
 // 还未开发
+
+echoContent('Welcome to HumanOS.', false);
+echoContent('Type [color: #0f0]help[/endcolor] to get started.', false);
+echoContent("该章节正在编写中。")
+
+// 锁输入框
+cmdline.disabled = true;
+echoContent('请耐心等待该章节的发布。', false);
