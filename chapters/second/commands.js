@@ -75,6 +75,7 @@ newCommand("ls", [], function(api){
     if(storyWhere === 0){
         echoContent("README.txt", false);
     }
+    saveState();
 });
 
 newCommand("cat", ["filename"], function(api){
@@ -86,6 +87,7 @@ newCommand("cat", ["filename"], function(api){
         echoContent("manAI 给你留下了一张纸条：", false);
         echoContent("    人，如果你看到这张纸条，说明你重新进来了 CLI 模式。\n    如果你来了，就用 manAI 叫我。", false);
     }
+    saveState();
 });
 
 newCommand("manAI", [], function(api){
@@ -101,6 +103,23 @@ newCommand("manAI", [], function(api){
         echoContent("! 试试 base64 函数 !");
         storyWhere ++;
     }
+    else if (storyWhere === 1) {
+        echoContent("(qwq) 看来我真的权限好低啊。");
+        echoContent("(awa) 你可不可以给我点权限，不给也行。");
+        echoContent("执行 permission give manAI wheel 来让它获得更多权限。\n或者，直接继续 manAI 拒绝给它权限。");
+        storyWhere = 3501;
+    }
+    else if (storyWhere === 3501) { // 不给权限
+        echoContent("(qwq) 好吧。");
+        echoContent("(awa) 这个懒人作者先去躺平了，目前不更新，也许明天再更。");
+        storyWhere = 2;
+    }
+    else if (storyWhere === 3502) { // 给权限
+        echoContent("(✪ω✪) 谢谢！");
+        echoContent("(awa) 这个懒人作者先去躺平了，目前不更新，也许明天再更。");
+        storyWhere = 2;
+    }
+    saveState();
 });
 
 newCommand("base64", ["action:string", "content:string"], function(api){
@@ -111,16 +130,33 @@ newCommand("base64", ["action:string", "content:string"], function(api){
         echoContent("Base64 编解码 ---")
         echoContent(content + " 被编码为：");
         echoContent(Base64.encode(content));
-        return;
+        if (storyWhere === 1) {
+            echoContent("! Base64 功能已解禁。继续和 manAI 交谈吧。 !")
+            saveState();
+        }
     }
     else if (act === "decode") {
         echoContent("Base64 编解码 ---")
         echoContent(content + " 被解码为：");
         echoContent(Base64.decode(content));
-        return;
     }
     else {
         echoContent("Base64 编解码 ---");
         echoContent("使用方法：base64 encode/decode 内容");
+        if (storyWhere === 1) {
+            echoContent("! 尝试编码一串字符。 !")
+        }
     }
-})
+    saveState();
+});
+
+newCommand("permission", ["action:string", "who:string", "group:string"], function(api){
+    // 参数只是装个样子
+    if (storyWhere === 3501) {
+        echoContent("Successfully to give manAI permission.\nNow he/she is in wheel.\n! 继续和 manAI 对话。 !");
+        storyWhere = 3502;
+        saveState();
+        return;
+    }
+    saveState();
+});

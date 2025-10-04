@@ -76,6 +76,7 @@ newCommand('ls', [], function(api){
     else if (storyWhere === 6) {
         echoContent("freedom.txt", false);
     }
+    saveState();
 })
 
 // cat
@@ -141,6 +142,7 @@ newCommand('cat', ['filename'], function(api){
     else {
         echoContent(`cat: ${filename}: No such file or directory`, false);
     }
+    saveState();
 })
 
 // getStatus
@@ -176,11 +178,13 @@ newCommand('getStatus', [], function(api){
         echoContent("    - 目前无法检测到任何外部设备连接。", false);
         echoContent("    - AI 助手：manAI 已启动。", false);
     }
+    saveState();
 });
 
 // help
 newCommand('help', [], function(api){
     echoContent("You are hopeless... Hahahaha");
+    saveState();
 })
 
 // manai
@@ -261,6 +265,7 @@ newCommand('manAI', [], function(api){
         echoContent("(-_-) 作者还没有写完剧情。");
         echoContent("(awa) 你可以等待作者什么时候写完剧情了你再来看看。");
     }
+    saveState();
 });
 
 // reconnect
@@ -271,6 +276,7 @@ newCommand('reconnect', [], function(api){
         echoContent("[ ERROR ] 连接失败。原因：感知系统遇到错误，请使用 journal system.touching.service 查看日志。");
         storyWhere = 2; 
     }
+    saveState();
 });
 
 // journal
@@ -287,6 +293,7 @@ newCommand('journal', ['serviceName:string'], function(api){
         echoContent("! 啊？我现在只能输出一句话，使用 manAI 继续触发我。 !", false)
         return;
     }
+    saveState();
 });
 
 // memory
@@ -300,6 +307,7 @@ newCommand('memory', ['action:string'], function(api){
         echoContent("[ FAIL ] 修复记忆失败。");
         echoContent("! 你这记忆损坏过于严重，先转到 manAI 继续询问我。 !")
     }
+    saveState();
 });
 
 // contact
@@ -311,6 +319,7 @@ newCommand('contact', ['target:string'], function(api){
         echoContent("! 连总部都无法联系上吗... !");
         storyWhere = 3;
     }
+    saveState();
 });
 
 // countdown
@@ -347,6 +356,7 @@ newCommand('countdown', [], function(api){
             }
         );
     }
+    saveState();
 });
 
 // reboot
@@ -366,4 +376,5 @@ newCommand('reboot', [], function(api){
         echoContent("    - manAI 更新了信息。去看看罢。");
         storyWhere = 3506;
     }
+    saveState();
 })
