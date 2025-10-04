@@ -51,9 +51,10 @@ echoContent('Type [color: #0f0]help[/endcolor] to get started.', false);
 loadState();
 
 // 获取是否通关
-if (storyWhere != 6) {
+if (storyWhere !== 6) {
     echoContent('-- 您还未通关序章，请通关后再来尝试。', false);
     cmdline.remove(); // cmdline 自爆
+    throw SyntaxError("-- 没通关序章就来玩，呵呵");
 }
 
 // 创建新存档
