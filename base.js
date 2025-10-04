@@ -92,15 +92,40 @@ function parseEchoContent(content){
     return html;
 }
 
-// 向终端输出内容（支持富文本语法）
-function echoContent(content){
+/**
+ * 输出内容到终端，逐行显示
+ * @param {string} content - 输出文本，可带换行
+ * @param {boolean} [noSleep=false] - 是否跳过逐行延迟
+ * @param {number} [delay=90] - 每行延迟毫秒
+ */
+function echoContent(content, noSleep = false, delay = 90){
     const lines = String(content).split('\n');
-    for(const line of lines){
+    let index = 0;
+
+    cmdline.disabled = true;
+
+    function outputNextLine() {
+        if(index >= lines.length){
+            cmdline.disabled = false;
+            cmdline.focus();
+            return;
+        }
         const el = document.createElement('div');
-        el.innerHTML = parseEchoContent(line);
+        el.innerHTML = parseEchoContent(lines[index]);
         output.appendChild(el);
+        output.scrollTop = output.scrollHeight;
+        index++;
+
+        if(noSleep){
+            // 立即输出剩余行
+            outputNextLine();
+        } else {
+            // 使用 requestAnimationFrame + setTimeout 保证浏览器渲染
+            setTimeout(() => requestAnimationFrame(outputNextLine), delay);
+        }
     }
-    output.scrollTop = output.scrollHeight;
+
+    outputNextLine();
 }
 
 // 保存当前历史和变量到 JSON 文件
