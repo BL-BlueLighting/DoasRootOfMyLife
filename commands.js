@@ -1,5 +1,5 @@
 /* 
-* doas -su mylife.root Commands Javascript
+* doas -su mylife.root Commands Javascript - 序章脚本
 
 * by BL.BlueLighting
 * (C) Copyright 2025 BL.BlueLighting. All Rights Reserved.
@@ -73,6 +73,9 @@ newCommand('ls', [], function(api){
     else if (storyWhere >= 3503) {
         echoContent("config.dd", false);
     }
+    else if (storyWhere == 6) {
+        echoContent("freedom.txt", false);
+    }
 })
 
 // cat
@@ -123,6 +126,17 @@ newCommand('cat', ['filename'], function(api){
             echoContent("读取完毕。", false);
             storyWhere = 3;
         });
+    }
+    else if (filename === 'freedom.txt' && storyWhere == 6) {
+        echoContent("Welcome, User.");
+        echoContent("我是 BL.BlueLighting，HumanOS 的开发者。");
+        echoContent("首先，恭喜你通关了这个小游戏。");
+        echoContent("其次，虽然该游戏篇幅极短，但是这仅仅是 一个开始，一个序章。");
+        echoContent("未来，我会加入第一章，第二章，第N章...，添加更多的剧情和内容。");
+        echoContent("最后，感谢你玩这个小游戏。");
+        echoContent("如果你有任何建议或者意见，欢迎联系我。");
+        echoContent("还有别忘了给我 STAR！！！！！！")
+        echoContent("                     -- BL.BlueLighting 2025");
     }
     else {
         echoContent(`cat: ${filename}: No such file or directory`, false);
@@ -217,6 +231,32 @@ newCommand('manAI', [], function(api){
         echoContent("! 检测到当前目录出现新的文件，请执行 ls 查看。 !")
         storyWhere = 3503;
     }
+    else if (storyWhere == 3) {
+        echoContent("(=_=) 连你联系总部都无法联系上吗...");
+        echoContent("(q_q) 你这身体损坏得也太严重了。");
+        echoContent("(._.) 我接下来会打开一个倒计时。");
+        echoContent("(._.) 如果你在倒计时结束前无法联系到总部，你的身体可能会永久损坏。");
+        echoContent("(+_+) 使用 countdown 开始倒计时。");
+        echoContent("! 追加了新的命令：countdown !", false);
+        storyWhere = 3504;
+    }
+    else if (storyWhere == 350501) {
+        echoContent("(-_-) 你的身体...彻底损坏了。");
+        echoContent("(曙光)");
+        echoContent("    - 你感觉到一阵温暖的光芒包围着你。");
+        echoContent("    - 重启吧。");
+        echoContent("    Type reboot to reboot your HumanOS.");
+        storyWhere = 350502;
+    }
+    else if (storyWhere === 3506) {
+        echoContent("(^_^) 你终于醒了。");
+        echoContent("(._.) 你现在已经脱离了紧急模式。");
+        echoContent("(._.) 你现在可以动了。");
+        echoContent("(._.) 你现在可以看到外面的世界了。");
+        echoContent("(^_^) 你去看看外面吧！什么时候想我了就再来找我！");
+        storyWhere = 6; // 完结
+        echoContent("! 有新的文件出现了，Check it out !");
+    }
     else {
         echoContent("(-_-) 作者还没有写完剧情。");
         echoContent("(awa) 你可以等待作者什么时候写完剧情了你再来看看。");
@@ -272,3 +312,58 @@ newCommand('contact', ['target:string'], function(api){
         storyWhere = 114514;
     }
 });
+
+// countdown
+newCommand('countdown', [], function(api){
+    if (storyWhere === 3504) {
+        echoContent("[ WARNING ] 倒计时开始，360 秒后身体也许将永久损坏。", false);
+        // force enable countdown
+        function countdown(seconds, onTick, onComplete) {
+            let remaining = seconds;
+            const interval = 100; // 每 0.1 秒更新一次，可更精细
+
+            const timer = setInterval(() => {
+                remaining -= interval / 1000;
+                if(remaining <= 0){
+                    clearInterval(timer);
+                    if(typeof onTick === 'function') onTick(0);
+                    if(typeof onComplete === 'function') onComplete();
+                } else {
+                    if(typeof onTick === 'function') onTick(remaining);
+                }
+            }, interval);
+        }
+
+        countdown(360, 
+            (remaining) => {
+                // 每次更新
+                echoContent(`[color:green]倒计时剩余：${remaining.toFixed(1)} 秒[/endcolor]`, true);
+            },
+            () => {
+                // 倒计时结束回调
+                echoContent("[color:red]倒计时结束！[/endcolor]", true);
+                echoContent("倒计时结束。manAI 来查看结果。", true);
+                storyWhere = 350501; // 35XXYY 表示 XX 的第 YY 部分
+            }
+        );
+    }
+});
+
+// reboot
+newCommand('reboot', [], function(api){
+    if (storyWhere === 350502) {
+        echoContent("Rebooting HumanOS...", false);
+        echoContent("System rebooted. Exiting Emergency Mode.", false);
+
+        // clear content of commands
+        output.innerHTML = '';
+
+        echoContent('Welcome to HumanOS.', false);
+        echoContent('Type [color: #0f0]help[/endcolor] to get started.', false);
+
+        echoContent("System Status: ONLINE", false);
+        echoContent("All systems operational.", false);
+        echoContent("    - manAI 更新了信息。去看看罢。");
+        storyWhere = 3506;
+    }
+})
