@@ -44,8 +44,6 @@ console.log("THANKS FOR YOUR PLAYING!");
 const api = window.FrameworkAPI;
 if(!api) throw new Error('FrameworkAPI is not available. Make sure base.js is loaded before commands.js');
 
-import { Base64 } from 'https://cdn.jsdelivr.net/npm/js-base64@3.7.8/base64.mjs';
-
 echoContent('Welcome to HumanOS.', false);
 echoContent('Type [color: #0f0]help[/endcolor] to get started.', false);
 
