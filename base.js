@@ -1,0 +1,252 @@
+/* 
+* doas -su mylife.root Base Framework
+
+* by BL.BlueLighting
+* (C) Copyright 2025 BL.BlueLighting. All Rights Reserved.
+* License: GPLv3
+
+* Do not distribute without permission.
+* Do not remove this header.
+
+  2025 / 10 / 04 
+  Version 1.0.0
+    Initial version
+    2025 / 10 / 04 13:40
+  Version 1.0.1
+    Fix: 修复了部分浏览器下进度条不显示的问题
+    2025 / 10 / 04 14:43
+*/
+(function(){
+  const output = document.getElementById('output');
+  const cmdline = document.getElementById('cmdline');
+
+  const STORAGE_KEY = 'doas-root-of-mylife-key';
+
+  // 命令表与上下文
+  const commands = new Map();
+  const history = [];
+  let historyIndex = null;
+  const context = { __vars: {} };
+  let storyWhere = 0;
+  let nextStory = false;
+
+  // 从 LocalStorage 恢复
+  (function loadState(){
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      try{
+        const data = JSON.parse(raw);
+        if(data.history) history.push(...data.history);
+        if(data.variables) Object.assign(context.__vars, data.variables);
+        if(typeof data.storyWhere === 'number') storyWhere = data.storyWhere;
+        if(typeof data.nextStory === 'boolean') nextStory = data.nextStory;
+      }catch(e){ console.warn('加载状态失败:', e); }
+    }
+  })();
+
+  // 保存状态
+  function saveState(){
+    const data = {
+      history: history.slice(),
+      variables: Object.assign({}, context.__vars),
+      storyWhere,
+      nextStory
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  // 解析 echoContent 富文本语法
+  function parseEchoContent(content){
+    let html = String(content);
+
+    // 颜色解析
+    html = html.replace(/\[color:\s*([^\]]+)\](.*?)\[\/endcolor\]/gis, (m, color, text)=>{
+      return `<span style="color:${color}">${text}</span>`;
+    });
+
+    // runCommand 提示解析
+    html = html.replace(/\[runCommand\s+command=([^\]]+)\]\((.*?)\)\[\/endrunning\]/gis, (m, cmd, args)=>{
+      return `Try: <span style="color:blue">${cmd}</span> <span style="color:gray">(${args})</span>`;
+    });
+
+    // 假进度条解析
+    html = html.replace(/\[progress(?:\s+max=(\d+))?(?:\s+timeAdd=([\d.]+))?\]\[\/progress\]/gis, (m, max, timeAdd)=>{
+      const maxVal = parseFloat(max) || 100;
+      const add = parseFloat(timeAdd) || 1.5;
+      const id = 'progress-' + Math.random().toString(36).slice(2);
+      setTimeout(()=>{
+        let val = 0;
+        const el = document.getElementById(id);
+        const timer = setInterval(()=>{
+          val += add;
+          if(val >= maxVal){ val = maxVal; clearInterval(timer); }
+          el.style.width = (val / maxVal * 100) + '%';
+          el.textContent = Math.floor(val) + '%';
+        }, 100);
+      }, 0);
+      return `<div style="background:#333;width:100%;height:20px;border-radius:4px;overflow:hidden;">
+                <div id="${id}" style="background:#4caf50;width:0%;height:100%;color:#fff;text-align:center;font-size:12px;"></div>
+              </div>`;
+    });
+
+    return html;
+  }
+
+  // 向终端输出内容（支持富文本语法）
+  function echoContent(content){
+    const lines = String(content).split('\n');
+    for(const line of lines){
+      const el = document.createElement('div');
+      el.innerHTML = parseEchoContent(line);
+      output.appendChild(el);
+    }
+    output.scrollTop = output.scrollHeight;
+  }
+
+  // 保存当前历史和变量到 JSON 文件
+  function saveContent(){
+    const data = {
+      savedAt: new Date().toISOString(),
+      history: history.slice(),
+      variables: Object.assign({}, context.__vars),
+      storyWhere,
+      nextStory
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `terminal-save-${Date.now()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  // 注册命令接口
+  function newCommand(name, paramDefs, handler){
+    if(typeof name !== 'string') throw new Error('命令名必须为字符串');
+    if(!Array.isArray(paramDefs)) paramDefs = [];
+    if(typeof handler !== 'function') throw new Error('命令处理函数必须为函数');
+    commands.set(name, { paramDefs: paramDefs.slice(), handler });
+  }
+
+  // 命令解析工具
+  function tokenize(str){
+    const tokens = [];
+    let cur = '';
+    let inQuote = false;
+    let quoteChar = '';
+    for(const ch of str){
+      if(inQuote){
+        if(ch === quoteChar){
+          inQuote = false;
+          quoteChar = '';
+          tokens.push(cur);
+          cur = '';
+        } else cur += ch;
+      } else {
+        if(ch === '"' || ch === "'"){
+          inQuote = true;
+          quoteChar = ch;
+        } else if(/\s/.test(ch)){
+          if(cur!==''){ tokens.push(cur); cur=''; }
+        } else cur += ch;
+      }
+    }
+    if(cur!=='') tokens.push(cur);
+    return tokens;
+  }
+
+  // 执行命令行
+  async function executeLine(rawLine){
+    if(!rawLine.trim()) return;
+    echoContent(`$ ${rawLine}`);
+    history.push(rawLine);
+    historyIndex = null;
+
+    const tokens = tokenize(rawLine);
+    const cmd = tokens.shift();
+    const entry = commands.get(cmd);
+    if(!entry){
+      echoContent(`未找到命令: ${cmd}`);
+      saveState();
+      return;
+    }
+
+    try{
+      const api = {
+        args: tokens.slice(),
+        context: context.__vars,
+        echo: echoContent,
+        save: saveContent,
+        setVar(k,v){ context.__vars[k] = v; },
+        getVar(k){ return context.__vars[k]; },
+        storyWhere,
+        nextStory,
+        setStoryWhere(v){ storyWhere = v; },
+        setNextStory(v){ nextStory = v; }
+      };
+      const result = await entry.handler(api);
+      if(typeof result === 'string' && result.startsWith('nextSTEP')){
+        nextStory = true;
+        storyWhere++;
+      }
+    } catch(err){
+      echoContent(`命令执行出错: ${err.message || err}`);
+      console.error(err);
+    }
+    saveState();
+  }
+
+  // 输入框事件
+  cmdline.addEventListener('keydown', async (e)=>{
+    if(e.key === 'Enter'){
+      const line = cmdline.value;
+      cmdline.value = '';
+      await executeLine(line);
+    } else if(e.key === 'ArrowUp'){
+      if(history.length === 0) return;
+      if(historyIndex === null) historyIndex = history.length - 1;
+      else historyIndex = Math.max(0, historyIndex - 1);
+      cmdline.value = history[historyIndex];
+      e.preventDefault();
+    } else if(e.key === 'ArrowDown'){
+      if(history.length === 0) return;
+      if(historyIndex === null) return;
+      historyIndex = Math.min(history.length - 1, historyIndex + 1);
+      cmdline.value = history[historyIndex] || '';
+      if(historyIndex === history.length - 1) historyIndex = null;
+      e.preventDefault();
+    }
+  });
+
+  // reset 函数
+  function reset(){
+    localStorage.clear();
+    location.reload();
+  }
+
+  // 向外暴露接口
+  window.FrameworkAPI = {
+    output,
+    cmdline,
+    STORAGE_KEY,
+    commands,
+    history,
+    historyIndex,
+    context,
+    storyWhere,
+    nextStory,
+    loadState,
+    saveState,
+    parseEchoContent,
+    echoContent,
+    saveContent,
+    newCommand,
+    tokenize,
+    executeLine,
+    reset
+  };
+
+})();
