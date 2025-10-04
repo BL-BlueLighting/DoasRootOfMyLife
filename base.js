@@ -25,7 +25,14 @@ console.log("        by BL.BlueLighting 2025");
 const output = document.getElementById('output');
 const cmdline = document.getElementById('cmdline');
 
-const STORAGE_KEY = 'doas-root-of-mylife-key';
+var STORAGE_KEY = 'doas-root-of-mylife-key';
+
+// 设置 STORAGE_KEY 以区分章节
+// STORAGE_KEY = 'doas-root-of-mylife-chapter1-key'; // 序章
+
+function setStorageKeyForChapter(chapterId){
+    STORAGE_KEY = `doas-root-of-mylife-chapter${chapterId}-key`;
+}
 
 // 命令表与上下文
 const commands = new Map();
