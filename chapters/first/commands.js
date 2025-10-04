@@ -309,7 +309,7 @@ newCommand('contact', ['target:string'], function(api){
         echoContent("[ INFO ] 尝试联系总部...");
         echoContent("[ ERROR ] 联系失败。原因：无法连接到总部网络。");
         echoContent("! 连总部都无法联系上吗... !");
-        storyWhere = 114514;
+        storyWhere = 3;
     }
 });
 
