@@ -1,7 +1,7 @@
 <div align="center">
   <h1>DoasRootOfMylife</h1>
   <p>别名 doas -su mylife.root</p>
-  <p>仓库上的链接有点慢，如果你觉得真的很慢可以访问 <a href="https://bl-bluelighting.github.io/DoasRootOfMyLiFE">Github.io 链接</a></p>
+  <p>仓库上的链接有点慢，如果你觉得真的很慢可以访问 <a href="https://bl-bluelighting.github.io/DoasRootOfMyLife">Github.io 链接</a></p>
 </div>
 
 # 剧情介绍
