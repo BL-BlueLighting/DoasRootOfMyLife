@@ -218,7 +218,7 @@ newCommand("check", ["id:string"], function(api) {
     if (storyWhere === 5) {
         // 请求 check 服务器
         const Http = new XMLHttpRequest();
-        const url='https://airoj.latingtude-studios.icu/trrrricks/checking.php';
+        const url='https://airoj.latingtude-studios.icu/trrrricks/checking.php?id=' + api.args [0];
         Http.open("GET", url);
         Http.send();
 
