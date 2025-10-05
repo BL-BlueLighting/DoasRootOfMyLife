@@ -5,6 +5,8 @@
   <h2>二次开发须知</h2>
 </div>
 
+# base.js - doas -su mylife.root Base Framework
+
 ## newCommand 函数
 `newCommand()` 函数为创建一个命令行函数的命令，参数如下：
 
@@ -67,5 +69,39 @@ api 提供了以下东西：
         setStorageKeyForChapter("custom-1-xxx");
 
 **若你没有修改 storageKey 导致用户存档丢失，请自行尝试恢复。**
+
+# achieve.js - doas -su mylife.root Achievement Framework
+
+## setStorageKeyForGame 函数
+`setStorageKeyForGame` 函数**必须在游戏开始前被执行，在执行 getAchieves 前被执行**。
+
+该函数用于设置 localStorageKey，提供 gameId 作为唯一标识符。
+
+**根据规定，所有自制的 doas -su mylife.root 必须在唯一标识符前加上 custom-，并给出改版昵称与章节。**
+
+例：
+
+    xxx 改版第一章使用 storageKey:
+        setStorageKeyForGame("xxx-1");
+        或
+        setStorageKeyForGame("1-xxx");
+
+**若你没有修改 storageKey 导致用户成就丢失，请自行尝试恢复。**
+
+## getAchieves 函数
+`getAchieves` 函数用于获得所有成就。**如果你的游戏需要成就系统，请在游戏正式开始前执行。**
+
+## saveAchieve 函数
+`saveAchieve` 函数用于保存所有成就。**该函数会被 addAchieve 在工作完后自动调用。**
+
+## addAchieve 函数
+`addAchieve` 函数用于获得成就，函数调用方法如下：
+
+    addAchieve(成就名，成就等级)
+
+官方定义的成就等级有 **Mythic, Master, Insane, Hard, Normal, Easy** 六个等级。
+
+## lookAchieves 函数
+`lookAchieve` 函数用于遍历并列出所有用户获得的成就。（仅限**该游戏**）
 
 -- BL.BlueLighting，最后一次更新 2025 / 10 / 05。

@@ -44,6 +44,9 @@ console.log("THANKS FOR YOUR PLAYING!");
 const api = window.FrameworkAPI;
 if(!api) throw new Error('FrameworkAPI is not available. Make sure base.js is loaded before commands.js');
 
+
+let nextStepOfMPM = "";
+
 echoContent('Welcome to HumanOS.', false);
 echoContent('Type [color: #0f0]help[/endcolor] to get started.', false);
 
@@ -127,11 +130,13 @@ newCommand("manAI", [], function(api){
     else if (storyWhere === 3501) { // 不给权限
         echoContent("(qwq) 好吧。");
         echoContent("(awa) 不知道谁在文件夹里留了一个文件，你去看看罢。");
+        accessGiven = false; // 不给权限设置
         storyWhere = 2;
     }
     else if (storyWhere === 3502) { // 给权限
         echoContent("(✪ω✪) 谢谢！");
         echoContent("(awa) 不知道谁在文件夹里留了一个文件，表层是用 base64 解的，我有权限因此就帮你解了。");
+        accessGiven = true; // 设置权限
         storyWhere = 201;
     }
     else if (storyWhere === 4) {
@@ -147,6 +152,32 @@ newCommand("manAI", [], function(api){
         echoContent("(q_q) 连作者都没有办法难住你吗。");
         echoContent("(p_p) 我认输。");
         storyWhere = 6;
+        echoContent("_(:3 」∠ )_ 彳亍口巴，话说你期末考试成绩怎么样？");
+        echoContent("你：（捏拳头）😡");
+        echoContent("(._.) 看来应该考的不好");
+        echoContent("(|||ﾟдﾟ) 难道你不知道 memory-package-manager 吗");
+        echoContent("你：那是什么？");
+        echoContent("(-_-) 这东西可以从 MPM 源下载知识。");
+        echoContent("(+_+) 你要不要试试？")
+        echoContent("! 外部消息：去吃饭 !")
+        echoContent("你：我先去吃饭了。")
+        echoContent("! 如果你不需要吃饭可以继续。 !")
+    }
+    else if (storyWhere === 6) {
+        echoContent("(awa) 吃完饭了？")
+        echoContent("(awa) 你去试试看吧。")
+        echoContent("! 追加了新的指令：mpm !")
+    }
+    else if (storyWhere === 601) {
+        echoContent("(qwq) 你装了什么啊？");
+        if (accessGiven) {
+            echoContent("(awa) 装了 " + nextStepOfMPM + " 吗？");
+        }
+        else {
+            echoContent("(qwq) 没权限我获取不到。");
+        }
+        echoContent("(awa) 总之就是你肯定知道怎么用 mpm 了吧。");
+        
     }
     else {
         echoContent("(awa) 你也许还没有完成剩下的任务。");
@@ -241,5 +272,85 @@ newCommand("check", ["id:string"], function(api) {
                 echoContent("YOU CLEARED. - 你真的好闲啊，可以进行下一步了。");
             }
         }});
+    }
+});
+
+function makePackageInstallInfo(package_name, version) {
+    echoContent("Packages:");
+    echoContent("    " + package_name + " (Version " + version + ")");
+    echoContent(":: To continue next action, use `mpm next`.")
+}
+
+function randomTimer(callback, upperLimit) {
+    var timerId = setTimeout(callback, Math.random() * upperLimit);
+    return {
+        cancel: function() {
+            clearTimeout(timerId);
+        }
+    };
+}
+
+// mpm
+newCommand("mpm", ["action:string", "more:string"], function(api){
+    // mpm
+    let act = api.args [0];
+    let more = api.args [1];
+
+    if (act === "help" || act === "") {
+        echoContent("Memory Package Manager - Version 361.33.21");
+        echoContent("Usage:")
+        echoContent("    install: Install a memory package.")
+        // 细节记忆卸载不了，没办法列出并且也不能查询。
+        return;
+    }
+
+    if (act == "install" && more != "") {
+        echoContent(":: Finding Package");
+        echoContent(":: Querying...");
+
+        // package list (sorry i only can do this things.)
+        if (more.toLowerCase() === "chinese-language-package") {
+            makePackageInstallInfo("chinese-language-package", "v5000.0.1"); // 细节中华上下五千年
+            nextStepOfMPM = more;
+        }
+        else if (more.toLowerCase() === "us-english-language-package") {
+            makePackageInstallInfo("us-english-language-package", "v911.0.2"); // 细节 911
+            nextStepOfMPM = more;
+        }
+        else if (more.toLowerCase() === "maths-all-knows") {
+            makePackageInstallInfo("maths-all-knows", "v114.5.14"); // 细节 114514... 哼哼饿啊啊啊
+            nextStepOfMPM = more;
+        }
+
+        echoContent("! Memory Package Manager 有些项目，比如 maths-all-knows 之类的... !")
+    }
+
+    else if (act == "next" && nextStepOfMPM != "") {
+        if (nextStepOfMPM == "us-english-language-package") {
+            echoContent(":: Failed to install `us-english-language-package` because your body language is chinese.");
+            return;
+        }
+
+        echoContent(":: Getting ready...")
+        echoContent(":: Downloading files from `huhttps://mirrors.tuna.tsinghua.edu.cn/" + nextStepOfMPM + "/humanos");
+        echoContent(":: Please hold on. Command line will be lock.");
+        // 锁 cmdline
+        cmdline.hidden = "true";
+        let timer = randomTimer(function(){
+            echoContent(":: Files downloaded.");
+        }, 10);
+
+        timer.cancel();
+
+        // 解锁 cmdline
+        cmdline.hidden = "false";
+        echoContent(":: " + nextStepOfMPM + " installed.");
+
+        // 下一步，如果等于 6 的话
+        if (storyWhere === 6) {
+            storyWhere = 601;
+            echoContent("! 召唤 manAI 吧。 !");
+        }
+        return;
     }
 });

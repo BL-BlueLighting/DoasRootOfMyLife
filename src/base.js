@@ -48,12 +48,12 @@ function loadState(){
     const raw = localStorage.getItem(STORAGE_KEY);
     if(raw){
         try{
-        const data = JSON.parse(raw);
-        if(data.history) history.push(...data.history);
-        if(data.variables) Object.assign(context.__vars, data.variables);
-        if(typeof data.storyWhere === 'number') storyWhere = data.storyWhere;
-        if(typeof data.nextStory === 'boolean') nextStory = data.nextStory;
-        if(typeof data.accessGiven === 'boolean') accessGiven = data.accessGiven;
+            const data = JSON.parse(raw);
+            if(data.history) history.push(...data.history);
+            if(data.variables) Object.assign(context.__vars, data.variables);
+            if(typeof data.storyWhere === 'number') storyWhere = data.storyWhere;
+            if(typeof data.nextStory === 'boolean') nextStory = data.nextStory;
+            if(typeof data.accessGiven === 'boolean') accessGiven = data.accessGiven;
         }catch(e){ console.warn('加载状态失败:', e); }
     }
 }
