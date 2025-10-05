@@ -28,6 +28,16 @@ Chapter 1 中的 SudoerOfMyself 在 Github 也有仓库，链接 <a href="https:
 
 然后在**本仓库**提 Issue，@我让我添加到下面这个列表，或者你自己加，提 PR 并 @ 我。
 
-| 语言作者 / Author      | 仓库链接 | 语言 |
+| 语言作者 / Author      | 仓库链接 / Repo links| 语言 / Language |
 | ----------- | ----------- | ----------- |
 | BL.BlueLighting      | <a href="https://github.com/BL-BlueLighting/DoasRootOfMyLife">本仓库</a>       | 中文 / Chinese / CN |
+
+# 如何创建自己的改版？
+很简单，查看 <a href="https://doas.latingtude-studios.icu/development">latingtude-studios.icu 二次开发须知</a> 或 <a href="https://bl-bluelighting.github.io/DoasRootOfMyLife/development">二次开发须知</a>
+后自己写一份 commands.js 替换原版的就可以了。
+
+然后在**本仓库**提 Issue，@我让我添加到下面这个列表，或者你自己加，提 PR 并 @ 我。
+
+| 改版作者 / Author      | 仓库链接 / Repo links | 改版昵称 / Name of version |
+| ----------- | ----------- | ----------- |
+| BL.BlueLighting      | <a href="https://github.com/BL-BlueLighting/DoasRootOfMyLife">本仓库</a>       | doas -u mylife.root 原版 |

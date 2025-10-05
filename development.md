@@ -1,4 +1,9 @@
-# 二次开发须知 Development Information
+<div align="center">
+  <img src="./README.logo.png" style="width: 100px; height: 100px;">
+  <h1>doas -su mylife.root</h1>
+  <p>- 别名 DoasRootOfMyLife -</p>
+  <h2>二次开发须知</h2>
+</div>
 
 ## newCommand 函数
 `newCommand()` 函数为创建一个命令行函数的命令，参数如下：
@@ -18,4 +23,49 @@
             [progress max=(最大进度) timeAdd(每秒增加的值)][/progress]
             [runCommand command=(函数名)](参数)[/endrunning]
 
-## 其他的请参考 base.js 中的注释，若有不清楚的请提 Issue，后续我会补齐。
+## loadState 函数
+`loadState` 函数用于加载用户在 localStorage 中存储的信息，**在每次加载游戏前，必须执行该命令。**
+
+## saveState 函数
+`saveState` 函数用于保存用户信息到 localStorage 中，**base.js 中已经添加了每次执行命令后保存的指令，若你需要修改存档，请手动保存。**
+
+## parseEchoContent 函数
+`parseEchoContent` 函数用于解析 `echoContent` 中富文本语法，**手动调用不会输出任何信息。**
+
+## tokenize 函数
+`tokenize` 函数用于解析用户输入的指令，提供 args 等。
+
+## executeLine 函数
+`executeLine` 函数在用户输入框按下 Enter 后自动执行的函数，调用 `tokenize` 解析参数和各种信息给予 Command。
+
+## reset 函数
+`reset` 函数用于清空 localStorage 信息，**为了防止误操作，没有添加相关函数。需要用户手动执行。**
+
+## Command 利用须知
+`newCommand` 的 handler，必须有最多一个参数，最好名叫 api;
+api 提供了以下东西：
+
+    args：一个列表，为参数内容，用 [] 访问。
+    context: 变量列表。
+    echo, save: 对应 echoContent 和 saveContent 函数（该函数已弃用）。
+    setVar, getVar: 创建和获取变量。
+    storyWhere, nextStory: storyWhere 代表目前进行到了哪里，nextStory 表示是否下一步故事（已弃用）。
+    setStoryWhere, setNextStory: 设置 storyWhere 和 nextStory 的值。
+
+## setStorageKeyForChapter 函数
+`setStorageKeyForChapter` 函数**必须在游戏开始前被执行，在执行 loadState 前被执行**。
+
+该函数用于设置 localStorageKey，提供 chapterId 作为唯一标识符。
+
+**根据规定，所有自制的 doas -su mylife.root 必须在唯一标识符前加上 custom-，并给出改版昵称与章节。**
+
+例：
+
+    xxx 改版第一章使用 storageKey:
+        setStorageKeyForChapter("custom-xxx-1");
+        或
+        setStorageKeyForChapter("custom-1-xxx");
+
+**若你没有修改 storageKey 导致用户存档丢失，请自行尝试恢复。**
+
+-- BL.BlueLighting，最后一次更新 2025 / 10 / 05。
