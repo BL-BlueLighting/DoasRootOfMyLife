@@ -236,7 +236,7 @@ newCommand("check", ["id:string"], function(api) {
             }
         }*/ // 旧请求方法，已弃用
         $.ajax({url: "https://airoj.latingtude-studios.icu/trrrricks/checking.php?id=" + api.args [0], success: function(result){
-            if (content.indexOf("true") != -1) { // json 转化不生效，直接用 search 了
+            if (result.indexOf("true") != -1) { // json 转化不生效，直接用 search 了
                 storyWhere = 501; // wtf, he passed;
                 echoContent("YOU CLEARED. - 你真的好闲啊，可以进行下一步了。");
             }
