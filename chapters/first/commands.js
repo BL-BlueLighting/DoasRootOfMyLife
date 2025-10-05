@@ -70,10 +70,10 @@ newCommand('ls', [], function(api){
         echoContent("manfile.txt", false);
         nextStory = false;
     }
-    else if (storyWhere === 3503) {
+    if (storyWhere === 3503) {
         echoContent("config.dd", false);
     }
-    else if (storyWhere === 6) {
+    if (storyWhere === 6) {
         echoContent("freedom.txt", false);
     }
     saveState();
@@ -87,7 +87,7 @@ newCommand('cat', ['filename'], function(api){
         echoContent("你如果看到了这篇文档，您的 HumanOS 已经进入了 Emergency Mode，紧急进入了 CLI 模式。", false);
         echoContent("请尝试 getStatus 获得身体状态。", false);
     }
-    else if (filename === 'system.log' && storyWhere >= 1){
+    if (filename === 'system.log' && storyWhere >= 1){
         echoContent("2025-10-04 13:40:00 System booting...", false);
         echoContent("2025-10-04 13:40:05 Loading modules...", false);
         echoContent("2025-10-04 13:40:10 Initializing hardware...", false);
@@ -102,7 +102,7 @@ newCommand('cat', ['filename'], function(api){
         echoContent("2025-10-04 13:45:30 Alert: Oxygen levels dropping. Immediate attention required.", false);
         echoContent("(Log End)")
     }
-    else if (filename === 'manfile.txt' && storyWhere >= 1){
+    if (filename === 'manfile.txt' && storyWhere >= 1){
         echoContent("很抱歉，目前 manfile.txt 无法连接到身体。", false);
         echoContent("正在启动 AI 助手，尝试帮助您。", false);
         echoContent("AI 助手启动成功。", false);
@@ -110,7 +110,7 @@ newCommand('cat', ['filename'], function(api){
         echoContent("! 追加了新的命令：manAI !", false)
         manAIInitialized = true;
     }
-    else if (filename === 'config.dd' && storyWhere >= 3503) {
+    if (filename === 'config.dd' && storyWhere >= 3503) {
         echoContent("这是一个二进制文件，无法直接查看。", false);
         newCommand("config.dd", [], function(api){
             echoContent("读取 config.dd 文件内容...", false);
@@ -128,7 +128,7 @@ newCommand('cat', ['filename'], function(api){
             storyWhere = 3;
         });
     }
-    else if (filename === 'freedom.txt' && storyWhere == 6) {
+    if (filename === 'freedom.txt' && storyWhere == 6) {
         echoContent("Welcome, User.");
         echoContent("我是 BL.BlueLighting，HumanOS 的开发者。");
         echoContent("首先，恭喜你通关了这个小游戏。");
