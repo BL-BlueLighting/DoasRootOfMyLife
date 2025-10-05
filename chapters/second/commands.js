@@ -75,10 +75,10 @@ newCommand("ls", [], function(api){
     if(storyWhere >= 0){
         echoContent("README.txt", false);
     }
-    else if (storyWhere >= 2) {
+    if (storyWhere === 2) {
         echoContent("sudoerofmyself", false);
     }
-    else if (storyWhere > 2 && storyWhere === 201) {
+    if (storyWhere > 2 || storyWhere === 201) {
         echoContent("sudoerofmyself", false);
         echoContent("sudoerofmyself.decrypt", false);
     }
@@ -94,11 +94,11 @@ newCommand("cat", ["filename"], function(api){
         echoContent("manAI 给你留下了一张纸条：", false);
         echoContent("    人，如果你看到这张纸条，说明你重新进来了 CLI 模式。\n    如果你来了，就用 manAI 叫我。", false);
     }
-    else if (storyWhere > 2 && filename == "sudoerofmyself") {
+    if (storyWhere === 2 && filename == "sudoerofmyself") {
         storyWhere = 3;
         echoContent("Li4uIC4uLSAtLi4uIC4uLiAtLi0uIC4tLiAuLiAtLi4uIC4gLyAtLi4uIC4tLi4gLi0uLS4tIC0uLi4gLi0uLiAuLi0gLiAuLS4uIC4uIC0tLiAuLi4uIC0gLi4gLS4gLS0uIC8gLS4tLS4gLi4tIC4uIC0uLiAtLS0uLi4gLi0tLS0gLi4uLi4gLi4uLS0gLi4uLi0gLS0tLi4gLi4uLi4gLi4tLS0gLi4uLS0gLS0tLi4gLS0tLi4gLS4tLS4tIC8gLS0tIC0uIC8gLS4uLiAuLiAuLS4uIC4uIC0uLi4gLi4gLi0uLiAuLiAtLi0uLS0gLyAuLSAtLiAtLi4gLS0uLi0tIC8gLi0tIC4uLi4gLiAuLS4gLiAvIC4uIC4uLiAvIC0tIC0uLS0gLyAuLi0gLi4gLS4uIC4uLS0uLg==");
     }
-    else if (storyWhere === 201 && filename == "sudoerofmyself.decrypt") {
+    if (storyWhere === 201 && filename == "sudoerofmyself.decrypt") {
         storyWhere = 3;
         echoContent("... ..- -... ... -.-. .-. .. -... . / -... .-.. .-.-.- -... .-.. ..- . .-.. .. --. .... - .. -. --. / -.--. ..- .. -.. ---... .---- ..... ...-- ....- ---.. ..... ..--- ...-- ---.. ---.. -.--.- / --- -. / -... .. .-.. .. -... .. .-.. .. -.-.-- / .- -. -.. --..-- / .-- .... . .-. . / .. ... / -- -.-- / ..- .. -.. ..--..");
     }
@@ -217,6 +217,7 @@ newCommand("1534852388", [], function(api){
 newCommand("check", ["id:string"], function(api) {
     if (storyWhere === 5) {
         // 请求 check 服务器
+        /*
         const Http = new XMLHttpRequest();
         const url='https://airoj.latingtude-studios.icu/trrrricks/checking.php?id=' + api.args [0];
         Http.open("GET", url);
@@ -225,12 +226,20 @@ newCommand("check", ["id:string"], function(api) {
         Http.onreadystatechange = (e) => {
             if (Http.readyState == 4 && Http.status == 200) {
                 var content = JSON.stringify(Http.requestText);
+                console.log(Http.requestText);
+                console.log(content);
                 if (content.status == true) {
                     // 我去，这 b 通过了
                     storyWhere = 501;
                     echoContent("YOU CLEARED DOOR OF doas -su mylife.root，话说你真的好闲啊。");
                 }
             }
-        }
+        }*/ // 旧请求方法，已弃用
+        $.ajax({url: "https://airoj.latingtude-studios.icu/trrrricks/checking.php?id=" + api.args [0], success: function(result){
+            if (content.indexOf("true") != -1) { // json 转化不生效，直接用 search 了
+                storyWhere = 501; // wtf, he passed;
+                echoContent("YOU CLEARED. - 你真的好闲啊，可以进行下一步了。");
+            }
+        }});
     }
 });
