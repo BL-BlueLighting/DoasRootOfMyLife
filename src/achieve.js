@@ -41,7 +41,7 @@ function saveAchieve() {
 function addAchieve(achieve_name, level) {
     var achieve = "[ " + level + " ] " + achieve_name
     echoContent("[ 成就 ] 「 " + level + " 」 " + achieve_name + " 获得。");
-    achieve.push(achieve);
+    achieves.push(achieve);
     saveAchieve();
 }
 

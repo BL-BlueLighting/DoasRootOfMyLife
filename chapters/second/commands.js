@@ -60,6 +60,14 @@ if (storyWhere !== 6) {
     throw SyntaxError("-- 没通关序章就来玩，呵呵");
 }
 
+setStorageKeyForGame("second");
+
+getAchieves();
+
+if (achieves.indexOf("[ Easy ] 欢迎来到 Chapter 1！") == -1) {
+    addAchieve("欢迎来到 Chapter 1！", "Easy");
+}
+
 // 创建新存档
 setStorageKeyForChapter(1);
 
