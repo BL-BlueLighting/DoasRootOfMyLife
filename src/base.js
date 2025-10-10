@@ -42,6 +42,8 @@ const context = { __vars: {} };
 let storyWhere = 0;
 let nextStory = false;
 let accessGiven = false;
+let asking = false;
+let askCallback = null;
 
 // 从 LocalStorage 恢复
 function loadState(){
@@ -200,6 +202,12 @@ function tokenize(str){
 
 // 执行命令行
 async function executeLine(rawLine){
+    if (asking) {
+        callAsk(rawLine);
+        asking = false;
+        return;
+    }
+
     if(!rawLine.trim()) return;
     echoContent(`$ ${rawLine}`);
     history.push(rawLine);
@@ -265,6 +273,27 @@ cmdline.addEventListener('keydown', async (e)=>{
 function reset(){
     localStorage.clear();
     location.reload();
+}
+
+// 添加 ask 函数
+function ask(prompt, callback) {
+    if (typeof prompt !== 'string') {
+        throw new Error('提示文本必须是字符串');
+    }
+    if (typeof callback !== 'function') {
+        throw new Error('回调函数必须是函数');
+    }
+    
+    asking = true;
+    askCallback = callback;
+    echoContent(prompt);
+}
+
+function callAsk(response) {
+    if (askCallback) {
+        askCallback(response);
+        askCallback = null;
+    }
 }
 
 // 向外暴露接口

@@ -184,11 +184,39 @@ newCommand("manAI", [], function(api){
         else {
             echoContent("(qwq) 没权限我获取不到。");
         }
+
         echoContent("(awa) 总之就是你肯定知道怎么用 mpm 了吧。");
-        
+        echoContent("(?w?) 话说回来，你多少岁啊？(留空可以拒绝回复，或者打空格也行。)");
+
+        ask("", (response) => {
+            if (response === "" || response === " ") {
+                echoContent("(awa) 好吧，看来你有点害羞。")
+                storyWhere = 7;
+            }
+            else {
+                // 如果小于 10 岁，直接输出 Never gonna give you up
+                if (parseInt(response) < 10) {
+                    echoContent("(awa) 这里不是诈骗网站。");
+                    echoContent("(qwq) 还有，这里有个链接。疑似是作者留下的。");
+                    echoContent("https://nggyu.latingtude-studios.icu/");
+                    storyWhere = 7;
+                }
+                else {
+                    echoContent("(awa) 哦，原来你 " + response + " 岁啊。");
+                    storyWhere = 7;
+                }
+            }
+        });
+    }
+    else if (storyWhere === 7) {
+        echoContent("(._.) 在这个世界，虽然只有你和我，但是因为 HumanOS 在人体活跃状态下可以连接到世界网的原因，");
+        echoContent("(._.) 很多恶意的人会试图攻击你的 HumanOS。");
+        echoContent("(+_+) 虽然人类已经进化了数几万年，但是 HumanOS 早就是一坨屎山了。");
+        echoContent("(-_-) 所以，你必须要会拯救自己的 HumanOS 于水火之中，比如 hfirewall enable, dragon reattack recent 之类的命令。");
+        echoContent("! 后续内容还没写完，我先去重构成 typescript 内容去了。 !")
     }
     else {
-        echoContent("(awa) 你也许还没有完成剩下的任务。");
+        echoContent("(awa) 你也许还没有完成剩下的任务，要不然就是还没写完。");
         echoContent("(awa) 先完成任务吧。");
     }
     saveState();

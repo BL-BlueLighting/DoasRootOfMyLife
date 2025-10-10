@@ -70,6 +70,17 @@ api 提供了以下东西：
 
 **若你没有修改 storageKey 导致用户存档丢失，请自行尝试恢复。**
 
+## ask 函数
+`ask` 函数用于在游戏中询问玩家问题。格式如下：
+
+    ask("[PROMPT]", function(response) {
+        ...
+    });
+
+    其中，response 是玩家输入的内容。
+
+**注意：PROMPT 可以留空，但不能不填。**
+
 # achieve.js - doas -su mylife.root Achievement Framework
 
 ## setStorageKeyForGame 函数
@@ -104,4 +115,4 @@ api 提供了以下东西：
 ## lookAchieves 函数
 `lookAchieve` 函数用于遍历并列出所有用户获得的成就。（仅限**该游戏**）
 
--- BL.BlueLighting，最后一次更新 2025 / 10 / 05。
+-- BL.BlueLighting，最后一次更新 2025 / 10 / 10。
