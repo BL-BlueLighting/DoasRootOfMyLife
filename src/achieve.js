@@ -13,7 +13,7 @@ var STORAGE_KEY = 'doas-root-of-mylife-key-achieves';
 
 // 设置 STORAGE_KEY 以区分自制和官方
 
-function setStorageKeyForGame(gameId){
+function a_setStorageKeyForGame(gameId){
     STORAGE_KEY = `doas-root-of-mylife-key-achieves-game-${gameId}`;
 }
 
@@ -53,6 +53,9 @@ function lookAchieves() {
         echoContent(achieves [i]);
     }
 }
+
+// 获取所有成就读取到 achieves
+getAchieves();
 
 // 开放接口挂载
 

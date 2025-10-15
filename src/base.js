@@ -28,7 +28,6 @@ const cmdline = document.getElementById('cmdline');
 var STORAGE_KEY = 'doas-root-of-mylife-key';
 
 // 设置 STORAGE_KEY 以区分章节
-// STORAGE_KEY = 'doas-root-of-mylife-chapter1-key'; // 序章
 
 function setStorageKeyForChapter(chapterId){
     STORAGE_KEY = `doas-root-of-mylife-chapter${chapterId}-key`;

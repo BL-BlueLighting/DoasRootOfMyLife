@@ -83,8 +83,8 @@ api 提供了以下东西：
 
 # achieve.js - doas -su mylife.root Achievement Framework
 
-## setStorageKeyForGame 函数
-`setStorageKeyForGame` 函数**必须在游戏开始前被执行，在执行 getAchieves 前被执行**。
+## a_setStorageKeyForGame 函数
+`a_setStorageKeyForGame` 函数**必须在游戏开始前被执行，在执行 getAchieves 前被执行**。
 
 该函数用于设置 localStorageKey，提供 gameId 作为唯一标识符。
 

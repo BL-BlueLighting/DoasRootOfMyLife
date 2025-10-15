@@ -44,7 +44,6 @@ console.log("THANKS FOR YOUR PLAYING!");
 const api = window.FrameworkAPI;
 if(!api) throw new Error('FrameworkAPI is not available. Make sure base.js is loaded before commands.js');
 
-
 let nextStepOfMPM = "";
 
 echoContent('Welcome to HumanOS.', false);
@@ -60,16 +59,14 @@ if (storyWhere !== 6) {
     throw SyntaxError("-- 没通关序章就来玩，呵呵");
 }
 
-setStorageKeyForGame("second");
+setStorageKeyForGame(1);
+a_setStorageKeyForGame(1);
 
 getAchieves();
 
 if (achieves.indexOf("[ Easy ] 欢迎来到 Chapter 1！") == -1) {
     addAchieve("欢迎来到 Chapter 1！", "Easy");
 }
-
-// 创建新存档
-setStorageKeyForChapter(1);
 
 // 先尝试读取
 loadState();
