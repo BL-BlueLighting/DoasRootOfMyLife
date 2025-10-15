@@ -59,7 +59,7 @@ if (storyWhere !== 6) {
     throw SyntaxError("-- 没通关序章就来玩，呵呵");
 }
 
-setStorageKeyForGame(1);
+setStorageKeyForChapter(1);
 a_setStorageKeyForGame(1);
 
 getAchieves();

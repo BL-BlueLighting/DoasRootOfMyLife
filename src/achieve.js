@@ -9,19 +9,19 @@
 * Do not remove this header.
 */
 
-var STORAGE_KEY = 'doas-root-of-mylife-key-achieves';
+var ACHIEVE_STORAGE_KEY = 'doas-root-of-mylife-key-achieves';
 
 // 设置 STORAGE_KEY 以区分自制和官方
 
 function a_setStorageKeyForGame(gameId){
-    STORAGE_KEY = `doas-root-of-mylife-key-achieves-game-${gameId}`;
+    ACHIEVE_STORAGE_KEY = `doas-root-of-mylife-key-achieves-game-${gameId}`;
 }
 
 // 获取成就列表
 
 var achieves = [];
 function getAchieves() {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(ACHIEVE_STORAGE_KEY);
     if(raw){
         try{
             const data = JSON.parse(raw);
@@ -33,7 +33,7 @@ function getAchieves() {
 // 保存成就
 
 function saveAchieve() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(achieves));
+    localStorage.setItem(ACHIEVE_STORAGE_KEY, JSON.stringify(achieves));
 }
 
 // 获取成就
@@ -54,8 +54,6 @@ function lookAchieves() {
     }
 }
 
-// 获取所有成就读取到 achieves
-getAchieves();
 
 // 开放接口挂载
 
