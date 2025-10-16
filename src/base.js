@@ -164,7 +164,7 @@ function cmdlineLock(locking) {
  * @param {number} [delay=30] - 每个字符的输出间隔（毫秒）
  * @param {function} [callback] - 输出完毕后的回调函数
  */
-function echoContentDelay(text, element, delay = 30, callback) {
+function echoContentDelay(text, element = output, delay = 30, callback = function() {}) {
     let i = 0;
     cmdlineLock(true);
 
