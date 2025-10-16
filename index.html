@@ -1,93 +1,168 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>doas -su mylife.root - 章节选择</title>
-    <style>
-        /* 页面整体样式 */
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #ca690d, #2575fc);
-            color: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>doas -su mylife.root - 章节选择</title>
+<style>
+/* ======= 黑客风样式 ======= */
+body {
+    margin: 0;
+    font-family: monospace;
+    background-color: #000;
+    color: #00ff66;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    overflow: hidden;
+}
 
-        /* 卡片容器 */
-        .card {
-            background-color: rgba(0,0,0,0.6);
-            padding: 40px 60px;
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-            max-width: 400px;
-            width: 90%;
-        }
+/* 初始菜单卡片 */
+.card {
+    background-color: rgba(0, 20, 0, 0.9);
+    border: 2px solid #00ff66;
+    padding: 40px 60px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 0 20px #00ff66;
+    transition: opacity 0.5s ease;
+}
+.card.fade-out {
+    opacity: 0;
+}
 
-        h1 {
-            margin-bottom: 20px;
-            font-size: 2em;
-            letter-spacing: 1px;
-        }
+/* 链接风格 */
+a {
+    display: inline-block;
+    color: #00ff66;
+    text-decoration: none;
+    border: 1px solid #00ff66;
+    padding: 10px 20px;
+    border-radius: 5px;
+    margin: 8px 0;
+    transition: background 0.3s, color 0.3s;
+}
+a:hover {
+    background-color: #00ff66;
+    color: #000;
+}
 
-        p {
-            margin-bottom: 30px;
-            font-size: 1.1em;
-        }
-
-        ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        li {
-            margin-bottom: 20px;
-        }
-
-        /* 渐变按钮风格 */
-        a {
-            display: inline-block;
-            text-decoration: none;
-            color: #fff;
-            background: linear-gradient(135deg, #1eff00, #feb47b);
-            padding: 12px 25px;
-            border-radius: 10px;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-        }
-
-        a:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-        }
-
-        /* 响应式字体 */
-        @media(max-width: 480px){
-            h1 { font-size: 1.5em; }
-            p { font-size: 1em; }
-            a { padding: 10px 20px; font-size: 0.95em; }
-        }
-    </style>
+/* 输出终端 */
+#terminal {
+    display: none;
+    width: 90%;
+    max-width: 800px;
+    height: 80vh;
+    background: #000;
+    border: 1px solid #00ff66;
+    padding: 15px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    box-shadow: 0 0 10px #00ff66;
+    border-radius: 8px;
+}
+.cursor {
+    display: inline-block;
+    width: 8px;
+    height: 16px;
+    background: #00ff66;
+    animation: blink 0.8s infinite;
+    vertical-align: bottom;
+}
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    50.01%, 100% { opacity: 0; }
+}
+</style>
 </head>
 
 <body>
-    <div class="card">
-        <img src="./README.logo.png" style="width: 128px; height: 128px;">
+    <!-- 菜单卡片 -->
+    <div class="card" id="menu">
+        <img src="./README.logo.png" width="128" height="128"><br>
         <h1>doas -su mylife.root</h1>
         <p>章节选择</p>
-        <ul>
-            <li><a href="./chapters/first/chapter.html">序章 - 意外而来</a></li>
-            <li><a href="./chapters/second/chapter.html">第一章 - 探索空间 (未完成)</a></li>
-            <li><a href="https://github.com/BL-BlueLighting/DoasRootOfMylife">doas -su mylife.root - 开源仓库</a></li>
-            <li><a href="./development">doas -su mylife.root - commands.js 编写教程</a></li>
+        <ul style="list-style:none;padding:0;margin:0;">
+            <li><a href="./chapters/first/chapter.html" class="launch">序章 - 意外而来</a></li>
+            <li><a href="./chapters/second/chapter.html" class="launch">第一章 - 探索空间 (未完成)</a></li>
+            <li><a href="https://github.com/BL-BlueLighting/DoasRootOfMylife" target="_blank">doas -su mylife.root - 开源仓库</a></li>
+            <li><a href="./development" class="launch">doas -su mylife.root - commands.js 编写教程</a></li>
         </ul>
     </div>
+
+    <!-- 终端输出区 -->
+    <div id="terminal"><span id="termContent"></span><span class="cursor"></span></div>
+
+<script>
+// ======= 输出内容 =======
+const bootText = `HumanOS Core v6.15.3
+:: Pulling humand
+:: HumanDaemon v6235.33.12
+[ OK ] Ready to initialize.
+[ WAIT ] Loading base service...
+[ SUCCESS ] Successfully to load base services.
+[ WAIT ] Trying to connect brainet...
+[ WARNING ] Your connection to brainet is not safety.
+[ SUCCESS ] Brainet is connected.
+[ WAIT ] Pulling humanSchedule
+
+:: HumanSchedule v6233.33.52
+[ NONE ] Nothing needs run.
+
+[ WAIT ] Trying to connect HumanBodyManagerService...
+
+:: HumanBMS v52362.22.13
+[ SUCCESS ] HumanBMS is launched.
+[ WAIT ] Waiting for HumanDaemon...
+
+[ SUCCESS ] HumanDaemon connection client started.
+[ INFO ] BIP: brain.humandaemon, Port: 67716.
+[ INFO ] Daemon BIP: brain.humanbms.client.hd, Port: 19198, BID: 3265
+
+:: HumanSystemInitializingModule started.
+[ INFO ] HSIM started.
+[ WAIT ] Trying to pull ui to user...
+[ FAILED ] EyeService not launch or corrupt.
+[ INFO ] HSIM Work finished.
+
+:: System Initialized. Welcome to HumanOS! ::`;
+
+// ======= 动画打印函数 =======
+function typeWriter(text, element, interval, callback) {
+    let i = 0;
+    function type() {
+        if (i < text.length) {
+            element.textContent += text[i];
+            i++;
+            setTimeout(type, interval);
+        } else if (callback) callback();
+    }
+    type();
+}
+
+// ======= 点击事件逻辑 =======
+document.querySelectorAll('.launch').forEach(link => {
+    link.addEventListener('click', e => {
+        e.preventDefault();
+        const target = link.getAttribute('href');
+        const menu = document.getElementById('menu');
+        const terminal = document.getElementById('terminal');
+        const termContent = document.getElementById('termContent');
+
+        // 隐藏菜单
+        menu.classList.add('fade-out');
+        setTimeout(() => {
+            menu.style.display = 'none';
+            terminal.style.display = 'block';
+            // 开始逐字输出
+            typeWriter(bootText, termContent, 30, () => {
+                // 全部输出后跳转
+                setTimeout(() => window.location.href = target, 1000);
+            });
+        }, 600);
+    });
+});
+</script>
 </body>
 </html>

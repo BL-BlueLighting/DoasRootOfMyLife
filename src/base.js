@@ -108,6 +108,82 @@ function parseEchoContent(content){
     return html;
 }
 
+/*
+// ======= 动画打印函数 =======
+function typeWriter(text, element, interval, callback) {
+    let i = 0;
+    function type() {
+        if (i < text.length) {
+            element.textContent += text[i];
+            i++;
+            setTimeout(type, interval);
+        } else if (callback) callback();
+    }
+    type();
+}
+
+// ======= 点击事件逻辑 =======
+document.querySelectorAll('.launch').forEach(link => {
+    link.addEventListener('click', e => {
+        e.preventDefault();
+        const target = link.getAttribute('href');
+        const menu = document.getElementById('menu');
+        const terminal = document.getElementById('terminal');
+        const termContent = document.getElementById('termContent');
+
+        // 隐藏菜单
+        menu.classList.add('fade-out');
+        setTimeout(() => {
+            menu.style.display = 'none';
+            terminal.style.display = 'block';
+            // 开始逐字输出
+            typeWriter(bootText, termContent, 30, () => {
+                // 全部输出后跳转
+                setTimeout(() => window.location.href = target, 1000);
+            });
+        }, 600);
+    });
+});
+*/
+
+// two function for private
+function cmdlineLock(locking) {
+    if (locking) {
+        cmdline.disabled = true;
+    }
+    else {
+        cmdline.disabled = false;
+        cmdline.focus();
+    }
+}
+
+/**
+ * echoContentDelay - 延迟逐字输出文本（终端打印效果）
+ * @param {string} text - 要输出的完整文本内容
+ * @param {HTMLElement} element - 输出目标元素
+ * @param {number} [delay=30] - 每个字符的输出间隔（毫秒）
+ * @param {function} [callback] - 输出完毕后的回调函数
+ */
+function echoContentDelay(text, element, delay = 30, callback) {
+    let i = 0;
+    cmdlineLock(true);
+
+    function printChar() {
+        if (i < text.length) {
+            let line = document.createElement('div');
+            line.innerHTML = text[i];
+            element.appendChild(line);
+            i++;
+            setTimeout(printChar, delay);
+        } else if (typeof callback === "function") {
+            cmdlineLock(false);
+            callback();
+        }
+    }
+    printChar();
+}
+
+
 /**
  * 输出内容到终端，逐行显示
  * @param {string} content - 输出文本，可带换行
