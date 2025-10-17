@@ -279,7 +279,7 @@ newCommand("pandorabox", ["act:string", "act2:string", "act3:string"], function(
         if (act3 == "scanAll") {
             echoContent("Hydra Shell - Scan ALL");
             echoContent("Scanning all ports on this host...");
-            
+            launchTask("Hydra first attack_ports");
         }
     }
 }, 8);

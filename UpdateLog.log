@@ -16,7 +16,7 @@
 该更新日志由 BL.BlueLighting 撰写。
 */
 
-2025 - 10 - 17 - structure re-generate (little-update):
+2025 - 10 - 17 - structure re-generate (little-update) - Commit.1:
     - 重建了页面结构，目前页面结构如下：
         - .github
         - content
@@ -42,3 +42,6 @@
         - UpdateLog.log (本文件)
     
     - 无其他更新
+
+2025 - 10 - 17 - story_update (feat. taskSys.js) - Commit.2:
+    - 添加了 tasks 目录和 first.tasks.js。
