@@ -210,7 +210,8 @@ newCommand("manAI", [], function(api){
         echoContentDelay("(._.) 很多恶意的人会试图攻击你的 HumanOS。");
         echoContentDelay("(+_+) 虽然人类已经进化了数几万年，但是 HumanOS 早就是一坨屎山了。");
         echoContentDelay("(-_-) 所以，你必须要会拯救自己的 HumanOS 于水火之中，比如 hfirewall enable, dragon reattack recent 之类的命令。");
-        echoContentDelay("! 后续内容还没写完，我先去重构成 typescript 内容去了。 !")
+        echoContentDelay("! 新的命令追加：pandorabox !");
+        storyWhere = 8;
     }
     else {
         echoContentDelay("(awa) 你也许还没有完成剩下的任务，要不然就是还没写完。");
@@ -218,6 +219,33 @@ newCommand("manAI", [], function(api){
     }
     saveState();
 });
+
+newCommand("pandorabox", ["act:string", "act2:string", "act3:string"], function(api) {
+    let act = api.args[0];
+    let act2 = api.args[1];
+    let act3 = api.args[2];
+
+    if (act == "") {
+        echoContent("PANDORA BOX - RE-ATTACK - SAFE YOUR HUMANOS");
+        echoContent("Usage: pandorabox [action] [action2] [action3]");
+        echoContent("Example:");
+        echoContent("    pandorabox enable");
+        echoContent("    pandorabox hydra re-attack");
+        echoContent("    pandorabox dragon attacking recent");
+    }
+
+    if (act == "enable") {
+        echoContent("PANDORA BOX - AUTO SAFING SERVICE - ENABLED.\nPANDORA BOX - ALL COMMANDS - GRANTED");
+    }
+
+    if (act == "hydra" && act2 == "re-attack") {
+        echoContent("PANDORA BOX - SKILL");
+        echoContent("Hydra - LAUNCHING RE-ATTACK-SYSTEM");
+        echoContentDelay("Hold on, it will take a while...", output, 900);
+        echoContent("SERVICE ENABLED.");
+        echoContent("Running re-attack..."); // 没写完
+    }
+}, 8);
 
 newCommand("base64", ["action:string", "content:string"], function(api){
     var act = api.args [0]
