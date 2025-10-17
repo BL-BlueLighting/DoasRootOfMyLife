@@ -13,6 +13,7 @@
     commandName: 命令名称
     params: 参数列表，["名称:类型"]
     handler: 函数
+    storyWhereNeed: 必须的 storyWhere，判断条件为 storyWhere >= storyWhereNeed, 默认 0.
 
 示例：`newCommand("test", ["test:string"], function(api) {echoContent(api.args [0])})`
 

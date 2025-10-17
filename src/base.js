@@ -241,11 +241,11 @@ function saveContent(){
 }
 
 // 注册命令接口
-function newCommand(name, paramDefs, handler){
+function newCommand(name, paramDefs, handler, storyWhereNeed = 0){
     if(typeof name !== 'string') throw new Error('命令名必须为字符串');
     if(!Array.isArray(paramDefs)) paramDefs = [];
     if(typeof handler !== 'function') throw new Error('命令处理函数必须为函数');
-    commands.set(name, { paramDefs: paramDefs.slice(), handler });
+    commands.set(name, { paramDefs: paramDefs.slice(), handler, storyWhereNeed });
 }
 
 // 命令解析工具
@@ -292,7 +292,13 @@ async function executeLine(rawLine){
     const cmd = tokens.shift();
     const entry = commands.get(cmd);
     if(!entry){
-        echoContent(`未找到命令: ${cmd}`);
+        echoContent(`Command not found: ${cmd}`);
+        saveState();
+        return;
+    }
+
+    if (entry.storyWhereNeed > storyWhere){ 
+        echoContent(`Command not found: ${cmd}`);
         saveState();
         return;
     }
