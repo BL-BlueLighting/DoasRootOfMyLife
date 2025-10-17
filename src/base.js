@@ -25,12 +25,12 @@ console.log("        by BL.BlueLighting 2025");
 const output = document.getElementById('output');
 const cmdline = document.getElementById('cmdline');
 
-var ACHIEVE_STORAGE_KEY = 'doas-root-of-mylife-key';
+var STORAGE_KEY = 'doas-root-of-mylife-key';
 
 // 设置 STORAGE_KEY 以区分章节
 
 function setStorageKeyForChapter(chapterId){
-    ACHIEVE_STORAGE_KEY = `doas-root-of-mylife-chapter${chapterId}-key`;
+    STORAGE_KEY = `doas-root-of-mylife-chapter${chapterId}-key`;
 }
 
 // 命令表与上下文
@@ -46,7 +46,7 @@ let askCallback = null;
 
 // 从 LocalStorage 恢复
 function loadState(){
-    const raw = localStorage.getItem(ACHIEVE_STORAGE_KEY);
+    const raw = localStorage.getItem(STORAGE_KEY);
     if(raw){
         try{
             const data = JSON.parse(raw);
@@ -68,7 +68,7 @@ function saveState(){
         nextStory,
         accessGiven
     };
-    localStorage.setItem(ACHIEVE_STORAGE_KEY, JSON.stringify(data));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
 // 解析 echoContent 富文本语法
@@ -381,7 +381,7 @@ function callAsk(response) {
 window.FrameworkAPI = {
     output,
     cmdline,
-    STORAGE_KEY: ACHIEVE_STORAGE_KEY,
+    STORAGE_KEY: STORAGE_KEY,
     commands,
     history,
     historyIndex,
