@@ -121,4 +121,36 @@ api 提供了以下东西：
 ## lookAchieves 函数
 `lookAchieve` 函数用于遍历并列出所有用户获得的成就。（仅限**该游戏**）
 
+# taskSys.js - doas -su mylife.root - Task System Framework
+
+## newTask 函数
+`newTask` 函数用于创建一个任务，函数调用方法如下：
+
+    newTask(name, callback, storyWhereNeed)
+
+示例：`newTask("aTask", function() { console.log("Task!") }, 0)`
+
+**storyWhereNeed 指需要的 storyWhere 值，条件 storyWhere >= storyWhereNeed**
+
+## launchTask 函数
+`launchTask` 函数用于启动任务，函数调用方法如下：
+
+    launchTask(name)
+
+示例：`launchTask("aTask")`
+
+## DEBUGGING / showTaskInfo 函数
+`showTaskInfo` 函数用于调试，函数调用方法如下：
+
+    showTaskInfo(name)
+
+示例：`showTaskInfo("aTask")`
+
+## DEVELOPMENTING / allTask 函数
+`allTask` 函数用于获取所有任务，函数调用方法如下：
+
+    allTask()
+
+示例：`allTask()`
+
 -- BL.BlueLighting，最后一次更新 2025 / 10 / 10。

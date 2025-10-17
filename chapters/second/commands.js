@@ -45,6 +45,8 @@ const api = window.FrameworkAPI;
 if(!api) throw new Error('FrameworkAPI is not available. Make sure base.js is loaded before commands.js');
 
 let nextStepOfMPM = "";
+let lastAttackIIP = "127.0.0.1";
+let panbox_hydra_enable = false;
 
 echoContent('Welcome to HumanOS.', false);
 echoContent('Type [color: #0f0]help[/endcolor] to get started.', false);
@@ -209,7 +211,7 @@ newCommand("manAI", [], function(api){
         echoContent("(._.) 在这个世界，虽然只有你和我，但是因为 HumanOS 在人体活跃状态下可以连接到世界网的原因，");
         echoContent("(._.) 很多恶意的人会试图攻击你的 HumanOS。");
         echoContent("(+_+) 虽然人类已经进化了数几万年，但是 HumanOS 早就是一坨屎山了。");
-        echoContent("(-_-) 所以，你必须要会拯救自己的 HumanOS 于水火之中，比如 hfirewall enable, dragon reattack recent 之类的命令。");
+        echoContent("(-_-) 所以，你必须要会拯救自己的 HumanOS 于水火之中，比如 hydra re-attack 之类的命令。");
         echoContent("! 新的命令追加：pandorabox !");
         storyWhere = 8;
     }
@@ -231,7 +233,6 @@ newCommand("pandorabox", ["act:string", "act2:string", "act3:string"], function(
         echoContent("Example:");
         echoContent("    pandorabox enable");
         echoContent("    pandorabox hydra re-attack");
-        echoContent("    pandorabox dragon attacking recent");
     }
 
     if (act == "enable") {
@@ -244,6 +245,42 @@ newCommand("pandorabox", ["act:string", "act2:string", "act3:string"], function(
         echoContent("Hold on, it will take a while...", output, 900);
         echoContent("SERVICE ENABLED.");
         echoContent("Running re-attack..."); // 没写完
+
+        if (lastAttackIIP === "127.0.0.1") echoContent("Failed to re-attack: You cannot attack your self.");
+        else {
+            echoContent("Cracking a port for attacking...");
+            cmdlineLock(true);
+            var interval = setInterval(function(){
+                cmdlineLock(false);
+                echoContent("Final Step: Open port...");
+                if (Math.random() < 0.5) {
+                    echoContent("Failed to open port.");
+                    echoContent("[ FAILED ] Failed to re-attack. Please try again.");
+                    echoContent("PANDORA BOX - SKILL - FAILED.");
+                    return;
+                }
+                else {
+                    echoContent("Port opened.");
+                    echoContent("Hydra shell opened. Please run commands by your self.");
+                    panbox_hydra_enable = true;
+                    return;
+                }
+            }, 3000);
+            clearInterval(interval);
+        }
+    }
+
+    if (act == "hydra" && act2 == "shell") {
+        if (panbox_hydra_enable == false) {
+            echoContent("== PLEASE OPEN HYDRA SHELL FIRST. ==");
+            return;
+        }
+
+        if (act3 == "scanAll") {
+            echoContent("Hydra Shell - Scan ALL");
+            echoContent("Scanning all ports on this host...");
+            
+        }
     }
 }, 8);
 
