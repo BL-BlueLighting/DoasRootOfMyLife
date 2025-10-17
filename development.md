@@ -82,10 +82,10 @@ api 提供了以下东西：
 
 **注意：PROMPT 可以留空，但不能不填。**
 
-## echoContentDelay 函数
-`echoContentDelay` 函数用于输出内容，但添加间隔，格式如下：
+## echoContent 函数
+`echoContent` 函数用于输出内容，但添加间隔，格式如下：
 
-    echoContentDelay(content, [输出内容的 element，请使用 output global var.], delay=30 (ms), callback=[回调函数，可以写为 function(){}，但不能为 undefined 或 null])
+    echoContent(content, [输出内容的 element，请使用 output global var.], delay=30 (ms), callback=[回调函数，可以写为 function(){}，但不能为 undefined 或 null])
  
 # achieve.js - doas -su mylife.root Achievement Framework
 

@@ -22,7 +22,7 @@ console.log("THANKS FOR YOUR PLAYING!");
 // 下面是 base.js 的相关内容，如果你需要二次开发可以参照
 /**
  * @typedef {Object} FrameworkAPIType
- * @property {function(string,bool):void} echoContentDelay - 输出内容到终端，支持富文本语法 ([color][/endcolor], [progress][/progress], [runCommand][/endrunning])，最后的 bool 值表示是否使用故事性输出
+ * @property {function(string,bool):void} echoContent - 输出内容到终端，支持富文本语法 ([color][/endcolor], [progress][/progress], [runCommand][/endrunning])，最后的 bool 值表示是否使用故事性输出
  * @property {function(string,string[],function(api:any):any):void} newCommand - 注册新命令，参数：命令名，参数定义数组，处理函数
  * @property {function():void} saveContent - 保存命令历史和变量到 JSON 文件
  * @property {function():void} reset - 清空 LocalStorage 并刷新页面
@@ -35,7 +35,7 @@ console.log("THANKS FOR YOUR PLAYING!");
  * @property {number|null} historyIndex - 历史命令游标
  * @property {function():void} loadState - 从 LocalStorage 加载状态
  * @property {function():void} saveState - 保存状态到 LocalStorage
- * @property {function(string):string} parseechoContentDelay - 解析富文本语法为 HTML
+ * @property {function(string):string} parseechoContent - 解析富文本语法为 HTML
  * @property {function(string):Promise<void>} executeLine - 执行一条命令行
  * @property {function(string):string[]} tokenize - 将命令行拆分成参数数组
  */
@@ -83,64 +83,64 @@ newCommand('ls', [], function(api){
 newCommand('cat', ['filename'], function(api){
     const filename = api.args [0];
     if(filename === 'hello.txt'){
-        echoContentDelay("你好，欢迎来到 HumanOS.");
-        echoContentDelay("你如果看到了这篇文档，您的 HumanOS 已经进入了 Emergency Mode，紧急进入了 CLI 模式。");
-        echoContentDelay("请尝试 getStatus 获得身体状态。");
+        echoContent("你好，欢迎来到 HumanOS.");
+        echoContent("你如果看到了这篇文档，您的 HumanOS 已经进入了 Emergency Mode，紧急进入了 CLI 模式。");
+        echoContent("请尝试 getStatus 获得身体状态。");
     }
     if (filename === 'system.log' && storyWhere >= 1){
-        echoContentDelay("2025-10-04 13:40:00 System booting...");
-        echoContentDelay("2025-10-04 13:40:05 Loading modules...");
-        echoContentDelay("2025-10-04 13:40:10 Initializing hardware...");
-        echoContentDelay("2025-10-04 13:40:15 Starting services...");
-        echoContentDelay("2025-10-04 13:40:20 Fatal error: Failed to load critical service: EyeInterfaceModule, ArmModule... more 17 modules failed.");
-        echoContentDelay("2025-10-04 13:40:25 Entering Emergency Mode...");
-        echoContentDelay("2025-10-04 13:40:30 Emergency Mode activated. Limited functionality available.");
-        echoContentDelay("2025-10-04 13:41:00 User 'brain' logged in as root.");
-        echoContentDelay("2025-10-04 13:42:37 Body looks unresponsive. No motor functions detected.");
-        echoContentDelay("2025-10-04 13:43:12 No external devices detected. Possible disconnection.");
-        echoContentDelay("2025-10-04 13:44:00 Warning: Vital signs unstable. Heartbeat irregularities detected.");
-        echoContentDelay("2025-10-04 13:45:30 Alert: Oxygen levels dropping. Immediate attention required.");
-        echoContentDelay("(Log End)")
+        echoContent("2025-10-04 13:40:00 System booting...");
+        echoContent("2025-10-04 13:40:05 Loading modules...");
+        echoContent("2025-10-04 13:40:10 Initializing hardware...");
+        echoContent("2025-10-04 13:40:15 Starting services...");
+        echoContent("2025-10-04 13:40:20 Fatal error: Failed to load critical service: EyeInterfaceModule, ArmModule... more 17 modules failed.");
+        echoContent("2025-10-04 13:40:25 Entering Emergency Mode...");
+        echoContent("2025-10-04 13:40:30 Emergency Mode activated. Limited functionality available.");
+        echoContent("2025-10-04 13:41:00 User 'brain' logged in as root.");
+        echoContent("2025-10-04 13:42:37 Body looks unresponsive. No motor functions detected.");
+        echoContent("2025-10-04 13:43:12 No external devices detected. Possible disconnection.");
+        echoContent("2025-10-04 13:44:00 Warning: Vital signs unstable. Heartbeat irregularities detected.");
+        echoContent("2025-10-04 13:45:30 Alert: Oxygen levels dropping. Immediate attention required.");
+        echoContent("(Log End)")
     }
     if (filename === 'manfile.txt' && storyWhere >= 1){
-        echoContentDelay("很抱歉，目前 manfile.txt 无法连接到身体。");
-        echoContentDelay("正在启动 AI 助手，尝试帮助您。");
-        echoContentDelay("AI 助手启动成功。");
-        echoContentDelay("欢迎使用 HumanOS AI 助手。");
-        echoContentDelay("! 追加了新的命令：manAI !")
+        echoContent("很抱歉，目前 manfile.txt 无法连接到身体。");
+        echoContent("正在启动 AI 助手，尝试帮助您。");
+        echoContent("AI 助手启动成功。");
+        echoContent("欢迎使用 HumanOS AI 助手。");
+        echoContent("! 追加了新的命令：manAI !")
         manAIInitialized = true;
     }
     if (filename === 'config.dd' && storyWhere >= 3503) {
-        echoContentDelay("这是一个二进制文件，无法直接查看。");
+        echoContent("这是一个二进制文件，无法直接查看。");
         newCommand("config.dd", [], function(api){
-            echoContentDelay("读取 config.dd 文件内容...");
-            echoContentDelay("[ CONFIG ] 设备ID: 246629976");
-            echoContentDelay("[ CONFIG ] 设备状态: 离线");
-            echoContentDelay("[ CONFIG ] 总部连接状态: 未连接");
-            echoContentDelay("[ CONFIG ] AI 助手状态: 已启动");
-            echoContentDelay("[ CONFIG ] 紧急模式: 已启用");
-            echoContentDelay("[ CONFIG ] 传感器状态: 触觉传感器离线，视觉传感器离线，听觉传感器离线");
-            echoContentDelay("[ CONFIG ] 记忆状态: 损坏 (区块 50-10948)");
-            echoContentDelay("[ CONFIG ] 认知状态: 损坏 (区块 230-9843)");
-            echoContentDelay("[ CONFIG ] 其他模块: 大部分模块损坏，需总部人员检查");
-            echoContentDelay("[ CONFIG ] 备注：总部联系方法：contact hq");
-            echoContentDelay("读取完毕。");
+            echoContent("读取 config.dd 文件内容...");
+            echoContent("[ CONFIG ] 设备ID: 246629976");
+            echoContent("[ CONFIG ] 设备状态: 离线");
+            echoContent("[ CONFIG ] 总部连接状态: 未连接");
+            echoContent("[ CONFIG ] AI 助手状态: 已启动");
+            echoContent("[ CONFIG ] 紧急模式: 已启用");
+            echoContent("[ CONFIG ] 传感器状态: 触觉传感器离线，视觉传感器离线，听觉传感器离线");
+            echoContent("[ CONFIG ] 记忆状态: 损坏 (区块 50-10948)");
+            echoContent("[ CONFIG ] 认知状态: 损坏 (区块 230-9843)");
+            echoContent("[ CONFIG ] 其他模块: 大部分模块损坏，需总部人员检查");
+            echoContent("[ CONFIG ] 备注：总部联系方法：contact hq");
+            echoContent("读取完毕。");
             storyWhere = 3;
         });
     }
     if (filename === 'freedom.txt' && storyWhere == 6) {
-        echoContentDelay("Welcome, User.");
-        echoContentDelay("我是 BL.BlueLighting，HumanOS 的开发者。");
-        echoContentDelay("首先，恭喜你通关了这个小游戏。");
-        echoContentDelay("其次，虽然该游戏篇幅极短，但是这仅仅是 一个开始，一个序章。");
-        echoContentDelay("未来，我会加入第一章，第二章，第N章...，添加更多的剧情和内容。");
-        echoContentDelay("最后，感谢你玩这个小游戏。");
-        echoContentDelay("如果你有任何建议或者意见，欢迎联系我。");
-        echoContentDelay("还有别忘了给我 STAR！！！！！！")
-        echoContentDelay("                     -- BL.BlueLighting 2025");
+        echoContent("Welcome, User.");
+        echoContent("我是 BL.BlueLighting，HumanOS 的开发者。");
+        echoContent("首先，恭喜你通关了这个小游戏。");
+        echoContent("其次，虽然该游戏篇幅极短，但是这仅仅是 一个开始，一个序章。");
+        echoContent("未来，我会加入第一章，第二章，第N章...，添加更多的剧情和内容。");
+        echoContent("最后，感谢你玩这个小游戏。");
+        echoContent("如果你有任何建议或者意见，欢迎联系我。");
+        echoContent("还有别忘了给我 STAR！！！！！！")
+        echoContent("                     -- BL.BlueLighting 2025");
     }
     else {
-        echoContentDelay(`cat: ${filename}: No such file or directory`);
+        echoContent(`cat: ${filename}: No such file or directory`);
     }
     saveState();
 })
@@ -148,35 +148,35 @@ newCommand('cat', ['filename'], function(api){
 // getStatus
 newCommand('getStatus', [], function(api){
     if(storyWhere === 0){
-        echoContentDelay("名称：[UNKNOWN]  状态：紧急模式  紧急模式 - EMERGENCY MODE -");
-        echoContentDelay("    - 紧急模式进入原因：");
-        echoContentDelay("        - 您目前身体已进入植物人模式。紧急模式下无法进行任何肢体操作。");
-        echoContentDelay("    - 心跳：76 bpm");
-        echoContentDelay("    - 血压：120/80 mmHg");
-        echoContentDelay("    - 血氧：98%");
-        echoContentDelay("    - 体温：36.5 ℃");
-        echoContentDelay("    - 呼吸频率：16 次/分钟");
-        echoContentDelay("    - 大脑活动：正常");
-        echoContentDelay("    - 目前无法检测到肢体信号以及事件。");
-        echoContentDelay("    - 目前无法检测到任何外部环境信息。");
-        echoContentDelay("    - 目前无法检测到任何外部设备连接。");
-        echoContentDelay("! 检测到当前目录出现新的文件，请执行 ls 查看。 !");
+        echoContent("名称：[UNKNOWN]  状态：紧急模式  紧急模式 - EMERGENCY MODE -");
+        echoContent("    - 紧急模式进入原因：");
+        echoContent("        - 您目前身体已进入植物人模式。紧急模式下无法进行任何肢体操作。");
+        echoContent("    - 心跳：76 bpm");
+        echoContent("    - 血压：120/80 mmHg");
+        echoContent("    - 血氧：98%");
+        echoContent("    - 体温：36.5 ℃");
+        echoContent("    - 呼吸频率：16 次/分钟");
+        echoContent("    - 大脑活动：正常");
+        echoContent("    - 目前无法检测到肢体信号以及事件。");
+        echoContent("    - 目前无法检测到任何外部环境信息。");
+        echoContent("    - 目前无法检测到任何外部设备连接。");
+        echoContent("! 检测到当前目录出现新的文件，请执行 ls 查看。 !");
         return "nextSTEP";
     }
     else {
-        echoContentDelay("名称：[UNKNOWN]  状态：紧急模式  紧急模式 - EMERGENCY MODE -");
-        echoContentDelay("    - 紧急模式进入原因：");
-        echoContentDelay("        - 您目前身体已进入植物人模式。紧急模式下无法进行任何肢体操作。");
-        echoContentDelay("    - 心跳：76 bpm");
-        echoContentDelay("    - 血压：120/80 mmHg");
-        echoContentDelay("    - 血氧：98%");
-        echoContentDelay("    - 体温：36.5 ℃");
-        echoContentDelay("    - 呼吸频率：16 次/分钟");
-        echoContentDelay("    - 大脑活动：正常");
-        echoContentDelay("    - 目前无法检测到肢体信号以及事件。");
-        echoContentDelay("    - 目前无法检测到任何外部环境信息。");
-        echoContentDelay("    - 目前无法检测到任何外部设备连接。");
-        echoContentDelay("    - AI 助手：manAI 已启动。");
+        echoContent("名称：[UNKNOWN]  状态：紧急模式  紧急模式 - EMERGENCY MODE -");
+        echoContent("    - 紧急模式进入原因：");
+        echoContent("        - 您目前身体已进入植物人模式。紧急模式下无法进行任何肢体操作。");
+        echoContent("    - 心跳：76 bpm");
+        echoContent("    - 血压：120/80 mmHg");
+        echoContent("    - 血氧：98%");
+        echoContent("    - 体温：36.5 ℃");
+        echoContent("    - 呼吸频率：16 次/分钟");
+        echoContent("    - 大脑活动：正常");
+        echoContent("    - 目前无法检测到肢体信号以及事件。");
+        echoContent("    - 目前无法检测到任何外部环境信息。");
+        echoContent("    - 目前无法检测到任何外部设备连接。");
+        echoContent("    - AI 助手：manAI 已启动。");
     }
     saveState();
 });
@@ -190,80 +190,80 @@ newCommand('help', [], function(api){
 // manai
 newCommand('manAI', [], function(api){
     if (manAIInitialized === false) {
-        echoContentDelay("很抱歉，manAI 暂时未被启动。");
+        echoContent("很抱歉，manAI 暂时未被启动。");
         return;
     }
     
     if (storyWhere === 1) {
-        echoContentDelay("(-_-) 额，你好。");
-        echoContentDelay("(awa) 看起来目前你的身体已经变成植物人了。");
-        echoContentDelay("(awa) 我是你的 AI 助手，叫我 perhaps 就好。");
-        echoContentDelay("(awa) 目前我能做的也很有限，不过我会尽力帮助你。");
-        echoContentDelay("(+_+) 如果你遇到了 ! 什么什么 ! 就是我在提示你！");
-        echoContentDelay("(qwq) 因为你目前的身体状况，我现在连接不到总部，因此现在这里只剩下我和你了。");
-        echoContentDelay("(p_p) 你现在也许可以试试 reconnect 命令，看看能不能连接上身体。");
+        echoContent("(-_-) 额，你好。");
+        echoContent("(awa) 看起来目前你的身体已经变成植物人了。");
+        echoContent("(awa) 我是你的 AI 助手，叫我 perhaps 就好。");
+        echoContent("(awa) 目前我能做的也很有限，不过我会尽力帮助你。");
+        echoContent("(+_+) 如果你遇到了 ! 什么什么 ! 就是我在提示你！");
+        echoContent("(qwq) 因为你目前的身体状况，我现在连接不到总部，因此现在这里只剩下我和你了。");
+        echoContent("(p_p) 你现在也许可以试试 reconnect 命令，看看能不能连接上身体。");
         storyWhere = 3501; // 以 35 开头的数字均为 manAI 相关剧情
     }
     else if (storyWhere === 2) {
-        echoContentDelay("(-_-) 你还好吗？");
-        echoContentDelay("(q_q) 我刚才试着帮你连接了一下身体，但是好像不太成功。");
-        echoContentDelay("(._.) 我检查一下你大脑系统怎么样了。");
-        echoContentDelay("(RUN) 正在执行命令，请无视下方内容。");
-        echoContentDelay("      - 记忆：损坏 (区块 50-10948)");
-        echoContentDelay("      - 认知：损坏 (区块 230-9843)");
-        echoContentDelay("(0_0) 你大脑是怎么了？");
-        echoContentDelay("(+_+) 我现在能检测到你大脑的部分功能还在工作。");
-        echoContentDelay("(._.) 你只能自己尝试修复记忆了，这部分我没有权限帮你。");
-        echoContentDelay("! 尝试 memory fixing !");
+        echoContent("(-_-) 你还好吗？");
+        echoContent("(q_q) 我刚才试着帮你连接了一下身体，但是好像不太成功。");
+        echoContent("(._.) 我检查一下你大脑系统怎么样了。");
+        echoContent("(RUN) 正在执行命令，请无视下方内容。");
+        echoContent("      - 记忆：损坏 (区块 50-10948)");
+        echoContent("      - 认知：损坏 (区块 230-9843)");
+        echoContent("(0_0) 你大脑是怎么了？");
+        echoContent("(+_+) 我现在能检测到你大脑的部分功能还在工作。");
+        echoContent("(._.) 你只能自己尝试修复记忆了，这部分我没有权限帮你。");
+        echoContent("! 尝试 memory fixing !");
         storyWhere = 3502;
     }
     else if (storyWhere == 3502) {
-        echoContentDelay("(O_o) 你这身体...异常的严重啊...");
-        echoContentDelay("(q_q) 我刚才尝试帮你修复记忆了，但是失败了。");
-        echoContentDelay("(._.) 你的记忆损坏过于严重，我也没法帮你了。");
-        echoContentDelay("(._.) 你只能等总部的人来帮你了。");
-        echoContentDelay("(?_?) 话说回来，你这身体发生什么了？");
-        echoContentDelay("你：不清楚，我好像是出了车祸，然后就变成这样了。");
-        echoContentDelay("(._.) 嗯...我也不清楚。");
-        echoContentDelay("(...) 正在进行身体调查与数据分析，请勿操作。");
-        echoContentDelay("(...) 分析中...");
-        echoContentDelay("(...) 分析中...");
-        echoContentDelay("(^_^) 还行！你这身体虽然损坏严重，但是还算完整。");
-        echoContentDelay("(._.) 你这身体应该还能用，只是需要总部的人来帮你重启一下。");
-        echoContentDelay("(-_-) 只不过你很难联系到总部了。");
-        echoContentDelay("(._.) 你只能等着了。");
-        echoContentDelay("! 检测到当前目录出现新的文件，请执行 ls 查看。 !")
+        echoContent("(O_o) 你这身体...异常的严重啊...");
+        echoContent("(q_q) 我刚才尝试帮你修复记忆了，但是失败了。");
+        echoContent("(._.) 你的记忆损坏过于严重，我也没法帮你了。");
+        echoContent("(._.) 你只能等总部的人来帮你了。");
+        echoContent("(?_?) 话说回来，你这身体发生什么了？");
+        echoContent("你：不清楚，我好像是出了车祸，然后就变成这样了。");
+        echoContent("(._.) 嗯...我也不清楚。");
+        echoContent("(...) 正在进行身体调查与数据分析，请勿操作。");
+        echoContent("(...) 分析中...");
+        echoContent("(...) 分析中...");
+        echoContent("(^_^) 还行！你这身体虽然损坏严重，但是还算完整。");
+        echoContent("(._.) 你这身体应该还能用，只是需要总部的人来帮你重启一下。");
+        echoContent("(-_-) 只不过你很难联系到总部了。");
+        echoContent("(._.) 你只能等着了。");
+        echoContent("! 检测到当前目录出现新的文件，请执行 ls 查看。 !")
         storyWhere = 3503;
     }
     else if (storyWhere == 3) {
-        echoContentDelay("(=_=) 连你联系总部都无法联系上吗...");
-        echoContentDelay("(q_q) 你这身体损坏得也太严重了。");
-        echoContentDelay("(._.) 我接下来会打开一个倒计时。");
-        echoContentDelay("(._.) 如果你在倒计时结束前无法联系到总部，你的身体可能会永久损坏。");
-        echoContentDelay("(+_+) 使用 countdown 开始倒计时。");
-        echoContentDelay("! 追加了新的命令：countdown !");
+        echoContent("(=_=) 连你联系总部都无法联系上吗...");
+        echoContent("(q_q) 你这身体损坏得也太严重了。");
+        echoContent("(._.) 我接下来会打开一个倒计时。");
+        echoContent("(._.) 如果你在倒计时结束前无法联系到总部，你的身体可能会永久损坏。");
+        echoContent("(+_+) 使用 countdown 开始倒计时。");
+        echoContent("! 追加了新的命令：countdown !");
         storyWhere = 3504;
     }
     else if (storyWhere == 350501) {
-        echoContentDelay("(-_-) 你的身体...彻底损坏了。");
-        echoContentDelay("(曙光)");
-        echoContentDelay("    - 你感觉到一阵温暖的光芒包围着你。");
-        echoContentDelay("    - 重启吧。");
-        echoContentDelay("    Type reboot to reboot your HumanOS.");
+        echoContent("(-_-) 你的身体...彻底损坏了。");
+        echoContent("(曙光)");
+        echoContent("    - 你感觉到一阵温暖的光芒包围着你。");
+        echoContent("    - 重启吧。");
+        echoContent("    Type reboot to reboot your HumanOS.");
         storyWhere = 350502;
     }
     else if (storyWhere === 3506) {
-        echoContentDelay("(^_^) 你终于醒了。");
-        echoContentDelay("(._.) 你现在已经脱离了紧急模式。");
-        echoContentDelay("(._.) 你现在可以动了。");
-        echoContentDelay("(._.) 你现在可以看到外面的世界了。");
-        echoContentDelay("(^_^) 你去看看外面吧！什么时候想我了就再来找我！");
+        echoContent("(^_^) 你终于醒了。");
+        echoContent("(._.) 你现在已经脱离了紧急模式。");
+        echoContent("(._.) 你现在可以动了。");
+        echoContent("(._.) 你现在可以看到外面的世界了。");
+        echoContent("(^_^) 你去看看外面吧！什么时候想我了就再来找我！");
         storyWhere = 6; // 完结
-        echoContentDelay("! 有新的文件出现了，Check it out !");
+        echoContent("! 有新的文件出现了，Check it out !");
     }
     else {
-        echoContentDelay("(-_-) 作者还没有写完剧情。");
-        echoContentDelay("(awa) 你可以等待作者什么时候写完剧情了你再来看看。");
+        echoContent("(-_-) 作者还没有写完剧情。");
+        echoContent("(awa) 你可以等待作者什么时候写完剧情了你再来看看。");
     }
     saveState();
 });
@@ -271,9 +271,9 @@ newCommand('manAI', [], function(api){
 // reconnect
 newCommand('reconnect', [], function(api){
     if (storyWhere === 3501) {
-        echoContentDelay("[ INFO ] 尝试重新连接感知系统...");
-        echoContentDelay("[ INFO ] 连接中...");
-        echoContentDelay("[ ERROR ] 连接失败。原因：感知系统遇到错误，请使用 journal system.touching.service 查看日志。");
+        echoContent("[ INFO ] 尝试重新连接感知系统...");
+        echoContent("[ INFO ] 连接中...");
+        echoContent("[ ERROR ] 连接失败。原因：感知系统遇到错误，请使用 journal system.touching.service 查看日志。");
         storyWhere = 2; 
     }
     saveState();
@@ -286,11 +286,11 @@ newCommand('journal', ['serviceName:string'], function(api){
         echoContent("X  System Touching Service (Failed)      启动后即退出 Code 15");
         echoContent("    - 描述：管理触觉传感器的服务。");
         echoContent("    - 最近日志：");
-        echoContentDelay("[ LOG ] 2025-10-04 14:00:00 System Touching Service started.");
-        echoContentDelay("[ LOG ] 2025-10-04 14:00:05 Initializing touch sensors...");
-        echoContentDelay("[ ERROR ] 2025-10-04 14:00:10 Failed to initialize touch sensors. Error Code: 15.");
-        echoContentDelay("[ LOG ] 2025-10-04 14:00:15 System Touching Service exiting.");
-        echoContentDelay("! 啊？我现在只能输出一句话，使用 manAI 继续触发我。 !")
+        echoContent("[ LOG ] 2025-10-04 14:00:00 System Touching Service started.");
+        echoContent("[ LOG ] 2025-10-04 14:00:05 Initializing touch sensors...");
+        echoContent("[ ERROR ] 2025-10-04 14:00:10 Failed to initialize touch sensors. Error Code: 15.");
+        echoContent("[ LOG ] 2025-10-04 14:00:15 System Touching Service exiting.");
+        echoContent("! 啊？我现在只能输出一句话，使用 manAI 继续触发我。 !")
         return;
     }
     saveState();
@@ -300,12 +300,12 @@ newCommand('journal', ['serviceName:string'], function(api){
 newCommand('memory', ['action:string'], function(api){
     const action = api.args[0];
     if (action === 'fixing' && storyWhere === 3502) {
-        echoContentDelay("[ RUN ] 尝试修复记忆...");
-        echoContentDelay("[ GET ] 检测区块...");
-        echoContentDelay("[ ??? ] 发现损坏区块 50-10948，尝试修复...");
-        echoContentDelay("[ ??? ] 修复失败，区块 11451-98430 也损坏，无法继续修复。");
-        echoContentDelay("[ FAIL ] 修复记忆失败。");
-        echoContentDelay("! 你这记忆损坏过于严重，先转到 manAI 继续询问我。 !")
+        echoContent("[ RUN ] 尝试修复记忆...");
+        echoContent("[ GET ] 检测区块...");
+        echoContent("[ ??? ] 发现损坏区块 50-10948，尝试修复...");
+        echoContent("[ ??? ] 修复失败，区块 11451-98430 也损坏，无法继续修复。");
+        echoContent("[ FAIL ] 修复记忆失败。");
+        echoContent("! 你这记忆损坏过于严重，先转到 manAI 继续询问我。 !")
     }
     saveState();
 });
@@ -314,9 +314,9 @@ newCommand('memory', ['action:string'], function(api){
 newCommand('contact', ['target:string'], function(api){
     const target = api.args[0];
     if (target === 'hq') {
-        echoContentDelay("[ INFO ] 尝试联系总部...");
-        echoContentDelay("[ ERROR ] 联系失败。原因：无法连接到总部网络。");
-        echoContentDelay("! 连总部都无法联系上吗... !");
+        echoContent("[ INFO ] 尝试联系总部...");
+        echoContent("[ ERROR ] 联系失败。原因：无法连接到总部网络。");
+        echoContent("! 连总部都无法联系上吗... !");
         storyWhere = 3;
     }
     saveState();
@@ -325,7 +325,7 @@ newCommand('contact', ['target:string'], function(api){
 // countdown
 newCommand('countdown', [], function(api){
     if (storyWhere === 3504) {
-        echoContentDelay("[ WARNING ] 倒计时开始，360 秒后身体也许将永久损坏。");
+        echoContent("[ WARNING ] 倒计时开始，360 秒后身体也许将永久损坏。");
         // force enable countdown
         function countdown(seconds, onTick, onComplete) {
             let remaining = seconds;
@@ -346,12 +346,12 @@ newCommand('countdown', [], function(api){
         countdown(360, 
             (remaining) => {
                 // 每次更新
-                echoContentDelay(`[color:green]倒计时剩余：${remaining.toFixed(1)} 秒[/endcolor]`, true);
+                echoContent(`[color:green]倒计时剩余：${remaining.toFixed(1)} 秒[/endcolor]`, true);
             },
             () => {
                 // 倒计时结束回调
-                echoContentDelay("[color:red]倒计时结束！[/endcolor]", true);
-                echoContentDelay("倒计时结束。manAI 来查看结果。", true);
+                echoContent("[color:red]倒计时结束！[/endcolor]", true);
+                echoContent("倒计时结束。manAI 来查看结果。", true);
                 storyWhere = 350501; // 35XXYY 表示 XX 的第 YY 部分
             }
         );
@@ -362,8 +362,8 @@ newCommand('countdown', [], function(api){
 // reboot
 newCommand('reboot', [], function(api){
     if (storyWhere === 350502) {
-        echoContentDelay("Rebooting HumanOS...");
-        echoContentDelay("System rebooted. Exiting Emergency Mode.");
+        echoContent("Rebooting HumanOS...");
+        echoContent("System rebooted. Exiting Emergency Mode.");
 
         // clear content of commands
         output.innerHTML = '';

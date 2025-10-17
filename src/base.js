@@ -158,7 +158,7 @@ function cmdlineLock(locking) {
 }
 
 /**
- * echoContentDelay - 延迟逐字输出文本（终端打印效果）
+ * echoContentDelay - 延迟逐字输出文本（终端打印效果） - deprecated
  * @param {string} text - 要输出的完整文本内容
  * @param {HTMLElement} element - 输出目标元素
  * @param {number} [delay=30] - 每个字符的输出间隔（毫秒）
