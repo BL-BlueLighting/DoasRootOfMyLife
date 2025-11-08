@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+    <head>
+        <title>Perfect Contact System</title>
+    </head>
+    <body style="background-color: white;">
+        <main style="margin-top: 27px; margin-left: 27px;">
+            <h1>完美通讯系统</h1>
+            <h2>- LOGIN SYSTEM -</h2>
+            <div class="login_form">
+                <label for="username">用户名:</label><br/>
+                <input type="text" id="username" name="username" required/><br/><br/>
+                <label for="password">密码:</label><br/>
+                <input type="password" id="password" name="password" required/><br/><br/>
+                <input type="button" id="login" value="登录"/>
+            </div>
+        </main>
+    </body>
+
+    <script src="../../../requirements/webtryContact.js"></script>
+
+    <script>
+        document.getElementById("login").addEventListener("click", function() {
+            localStorage.setItem("droml-webtry-captured-packet", {
+                ip: "127.0.0.1",
+                sender: "Chromium",
+                more: `
+                ------ BEGIN PACKET ------
+                Method: Post
+                Request-URI: /api/v1/login
+                Host: 173.5.5.3:80
+                User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36 Edg/110.0.1587.69
+
+                Content-Type: application/x-www-form-urlencoded
+                Content-Length: ${"username=".length + document.getElementById("username").value.length + "&password=".length + document.getElementById("password").value.length}
+
+                Request-Source: username=${document.getElementById("username").value}&password=${document.getElementById("password").value}
+                Request-Raw: 
+                {
+                    'Username': '${document.getElementById("username").value}',
+                    'Password': '${document.getElementById("password").value}'
+                }
+                ------ END PACKET ------
+                `
+            })
+            setContact("drom-contact-locals-2", "true");
+            debugger;
+            window.close();
+        })
+    </script>
+</html>

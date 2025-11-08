@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+    <head>
+        <title>Perfect Contact System</title>
+    </head>
+    <body style="background-color: white;">
+        <main style="margin-top: 27px; margin-left: 27px;">
+            <h1>完美通讯系统</h1>
+            <h2>- LOGIN SYSTEM -</h2>
+            <div class="login_form">
+                <label for="username">用户名:</label><br/>
+                <input type="text" id="username" name="username" required/><br/><br/>
+                <label for="password">密码:</label><br/>
+                <input type="password" id="password" name="password" required/><br/><br/>
+                <input type="button" id="login" value="登录"/>
+            </div>
+            <a href="./1004_2.html" style="display: none;" id="manage">跳转到管理页</a>
+        </main>
+    </body>
+
+    <script src="../../../requirements/webtryContact.js"></script>
+
+    <script>
+        // 设计好的
+        const correctUsername = "admin";
+        const correctPassword = "woCaoNiMaDeJianPuZhai";
+
+        // 获取登录按钮
+        const loginButton = document.getElementById("login");
+
+        // 错误次数
+        let errorCount = 0;
+
+        // 添加点击事件监听器
+        loginButton.addEventListener("click", function() {
+            // 获取用户名和密码
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            // 检查用户名和密码是否正确
+            if (username === correctUsername && password === correctPassword) {
+                alert("登录成功！");
+                manage.style.display = "inline"; // 显示管理页链接
+                setContact("drom-contact-locals-1", "true");
+            } else if (username == "user" && password === "123456") {
+                alert("普通用户无法登录管理后台。");      
+            } else {
+                if (errorCount >= 3) {
+                    alert("错误次数过多，请稍后再试。");
+                } else {
+                    alert("用户名或密码错误，请重试。");
+                    errorCount++;
+                }
+            }
+        });
+
+    </script>
+</html>

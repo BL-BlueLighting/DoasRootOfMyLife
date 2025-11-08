@@ -43,6 +43,21 @@ let nextStory = false;
 let accessGiven = false;
 let asking = false;
 let askCallback = null;
+let sideBarEnabled = false;
+
+// Load web try
+function loadWebTry(page_id) {
+    const webtry_url = `./webtries/webtry.html?pageid=${page_id}`;
+    // 弹出新小窗口打开
+    window.open(webtry_url, '_blank', 'popup=true'); // 新窗口打开
+}
+
+// Load capture
+function loadCapturer(ip, sender, more) {
+    const capturer_url = `./webtries/capturer.html?ip=${encodeURIComponent(ip)}&sender=${encodeURIComponent(sender)}`;
+    localStorage.setItem("dsmr-capturer-more", more);
+    window.open(capturer_url, '_blank', 'popup=true');
+}
 
 // 从 LocalStorage 恢复
 function loadState(){
@@ -55,6 +70,7 @@ function loadState(){
             if(typeof data.storyWhere === 'number') storyWhere = data.storyWhere;
             if(typeof data.nextStory === 'boolean') nextStory = data.nextStory;
             if(typeof data.accessGiven === 'boolean') accessGiven = data.accessGiven;
+            if(typeof data.sideBarEnabled === 'boolean') sideBarEnabled = data.sideBarEnabled;
         }catch(e){ console.warn('加载状态失败:', e); }
     }
 }
@@ -66,7 +82,8 @@ function saveState(){
         variables: Object.assign({}, context.__vars),
         storyWhere,
         nextStory,
-        accessGiven
+        accessGiven,
+        sideBarEnabled
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }

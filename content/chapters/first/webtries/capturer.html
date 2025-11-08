@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>HumanOS - Capturer</title>
+<style>
+  :root{
+    --bg:#000;
+    --panel:#071010;
+    --accent:#00ff88;
+    --muted:#67ffb0;
+    --card-bg: rgba(0,0,0,0.6);
+  }
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--accent);font-family:ui-monospace,Consolas,monospace;}
+  .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;}
+  .card{
+    width:980px;max-width:calc(100% - 40px);background:linear-gradient(180deg,#040404 0%, #071010 100%);border:1px solid rgba(0,255,136,0.08);
+    box-shadow: 0 8px 40px rgba(0,255,136,0.04);border-radius:8px;padding:18px;display:flex;gap:14px;
+  }
+  .left{flex:1;display:flex;flex-direction:column;gap:12px;}
+  .right{width:320px;min-width:260px;display:flex;flex-direction:column;gap:12px;}
+  .section{background:var(--card-bg);border:1px solid rgba(0,255,136,0.06);padding:12px;border-radius:6px;}
+  .section h2{margin:0 0 8px 0;color:var(--muted);font-size:14px;}
+  .kv{font-size:13px;line-height:1.6;color:var(--accent);display:flex;gap:8px;align-items:center;}
+  .kv .k{color:rgba(255,255,255,0.25);min-width:88px;}
+  .kv .v{flex:1;color:var(--accent);word-break:break-all;}
+  .controls{display:flex;gap:8px;margin-top:8px;}
+  .btn{background:transparent;border:1px solid rgba(0,255,136,0.12);color:var(--accent);padding:6px 10px;border-radius:6px;cursor:pointer}
+  .btn:active{transform:translateY(1px)}
+  textarea#moreArea{width:94%;height:260px;background:#030403;color:var(--accent);border:1px solid rgba(0,255,136,0.06);padding:10px;border-radius:6px;resize:vertical;font-family:ui-monospace,Consolas,monospace;font-size:13px;}
+  .muted{color:rgba(255,255,255,0.24);font-size:12px;}
+  .small{font-size:12px;padding:6px 8px}
+  .row{display:flex;gap:8px;align-items:center}
+  .copy-note{color:rgba(255,255,255,0.12);font-size:12px;margin-top:6px}
+  @media(max-width:900px){
+    .card{flex-direction:column;}
+    .right{width:100%}
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card" role="main" aria-label="DSMR Capturer UI">
+      <h3>Capturer - CAPTURED!</h3>
+      <br/>
+      <div class="left">
+        <div class="section" id="infoSection">
+          <h2>Information - 信息</h2>
+          <div class="kv"><div class="k">IP:</div><div class="v" id="info_ip">--</div></div>
+          <div class="kv"><div class="k">Sender:</div><div class="v" id="info_sender">--</div></div>
+          <div class="controls">
+            <div style="flex:1"></div>
+            <span class="muted" id="timeStamp"></span>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>More - 更多</h2>
+          <textarea id="moreArea" placeholder="" disabled></textarea>
+          <div class="row" style="justify-content:space-between;margin-top:8px">
+            <button class="btn small" id="btnLoadMore">加载</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ===== 参数读取 ===== */
+const params = new URLSearchParams(window.location.search);
+const param_ip = params.get('ip') || '0.0.0.0';
+const param_sender = params.get('sender') || 'Chromium';
+
+/* ===== 本地 key ===== */
+const LOCAL_KEY = 'dsmr-capturer-more';
+
+/* ===== 元素引用 ===== */
+const el_ip = document.getElementById('info_ip');
+const el_sender = document.getElementById('info_sender');
+const el_more = document.getElementById('moreArea');
+const el_preview = document.getElementById('previewArea');
+const el_time = document.getElementById('timeStamp');
+
+/* ===== 初始化显示 ===== */
+function renderInfo(){
+  el_ip.textContent = param_ip;
+  el_sender.textContent = param_sender;
+  el_time.textContent = new Date().toLocaleString();
+}
+function loadMoreFromStorage(){
+  const raw = localStorage.getItem(LOCAL_KEY) || '';
+  el_more.value = raw;
+}
+function saveMoreToStorage(){
+  const v = el_more.value || '';
+  localStorage.setItem(LOCAL_KEY, v);
+  loadMoreFromStorage();
+}
+function clearMoreStorage(){
+  localStorage.removeItem(LOCAL_KEY);
+  loadMoreFromStorage();
+}
+
+/* ===== 接口导出为全局函数（便于其他脚本调用） ===== */
+window.capturer = window.capturer || {};
+window.capturer.updateInfo = function(ip, sender){
+  if(ip) { el_ip.textContent = ip; }
+  if(sender) { el_sender.textContent = sender; }
+  el_time.textContent = new Date().toLocaleString();
+};
+window.capturer.loadMore = loadMoreFromStorage;
+window.capturer.saveMore = saveMoreToStorage;
+window.capturer.clearMore = clearMoreStorage;
+
+/* 页面初始化 */
+renderInfo();
+loadMoreFromStorage();
+
+/* 支持外部脚本通过事件监听更多交互 */
+window.addEventListener('storage', (e) => {
+  if(e.key === LOCAL_KEY) loadMoreFromStorage();
+});
+</script>
+</body>
+</html>

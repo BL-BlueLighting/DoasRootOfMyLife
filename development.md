@@ -7,6 +7,43 @@
 
 # base.js - doas -su mylife.root Base Framework
 
+## Variables
+你也许在 base.js 里看到过这些东西：
+
+<code>
+
+const commands = new Map();
+
+const history = [];
+
+let historyIndex = null;
+
+const context = { __vars: {} };
+
+let storyWhere = 0;
+
+let nextStory = false;
+
+let accessGiven = false;
+
+let asking = false;
+
+let askCallback = null;
+
+</code>
+
+这些东西都是用来控制游戏进程的。
+
+然而，你需要注意的仅有 `storyWhere`。
+
+`storyWhere` 是整个游戏最重要的东西，用于控制故事流程。
+
+这个是数值规范：
+
+    ?/??: 单数字/双数字 为故事主线。
+    1???: PandoraBox 故事主线内容。
+    35??: manAI 相关故事内容，通常只在序章使用，同样为故事主线。
+
 ## newCommand 函数
 `newCommand()` 函数为创建一个命令行函数的命令，参数如下：
 

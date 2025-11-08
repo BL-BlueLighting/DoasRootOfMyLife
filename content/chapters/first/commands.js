@@ -47,6 +47,8 @@ if(!api) throw new Error('FrameworkAPI is not available. Make sure base.js is lo
 let nextStepOfMPM = "";
 let lastAttackIIP = "127.0.0.1";
 let panbox_hydra_enable = false;
+let panbox_hydra_mysql_enable = false;
+let debug = false; // 通过控制台调节
 
 echoContent('Welcome to HumanOS.', false);
 echoContent('Type [color: #0f0]help[/endcolor] to get started.', false);
@@ -76,6 +78,11 @@ loadState();
 // 如果没有读取到任何进度，说明是新存档
 if (storyWhere === 0) {
     saveState();
+}
+
+if (sideBarEnabled) {
+    showPanel();
+    updateStatus();
 }
 
 // 主要程序部分 //
@@ -211,9 +218,15 @@ newCommand("manAI", [], function(api){
         echoContent("(._.) 在这个世界，虽然只有你和我，但是因为 HumanOS 在人体活跃状态下可以连接到世界网的原因，");
         echoContent("(._.) 很多恶意的人会试图攻击你的 HumanOS。");
         echoContent("(+_+) 虽然人类已经进化了数几万年，但是 HumanOS 早就是一坨屎山了。");
-        echoContent("(-_-) 所以，你必须要会拯救自己的 HumanOS 于水火之中，比如 hydra re-attack 之类的命令。");
+        echoContent("(-_-) 所以，你必须要会拯救自己的 HumanOS 于水火之中，比如 hydra attack 之类的命令。");
         echoContent("! 新的命令追加：pandorabox !");
         storyWhere = 8;
+    }
+    else if (storyWhere === 1001) {
+        echoContent("(awa) 这是一个虚拟服务器的 IP，试试破解他！");
+        echoContent("! NEW CRACK: 173.5.5.3 !");
+        storyWhere = 1002;
+
     }
     else {
         echoContent("(awa) 你也许还没有完成剩下的任务，要不然就是还没写完。");
@@ -233,6 +246,8 @@ newCommand("pandorabox", ["act:string", "act2:string", "act3:string"], function(
         echoContent("Example:");
         echoContent("    pandorabox enable");
         echoContent("    pandorabox hydra re-attack");
+        echoContent("! manAI UPDATED !");
+        storyWhere = 1001; // 以 1 开头的均为 hack 相关内容
     }
 
     if (act == "enable") {
@@ -270,6 +285,41 @@ newCommand("pandorabox", ["act:string", "act2:string", "act3:string"], function(
         }
     }
 
+    if (act == "hydra" && act2 == "attack") {
+        echoContent("PANDORA BOX - SKILL");
+        echoContent("Hydra - LAUNCHING RE-ATTACK-SYSTEM");
+        echoContent("Hold on, it will take a while...", output, 900);
+        echoContent("SERVICE ENABLED.");
+
+        if (act3 == "127.0.0.1") {
+            echoContent("Failed to attack: You cannot attack your self.");
+            return;
+        }
+
+        else if (act3 == "173.5.5.3" && storyWhere === 1002) {
+            echoContent("Running attack...");
+            cmdlineLock(true);
+            var interval = setInterval(function(){
+                cmdlineLock(false);
+                clearInterval(interval);
+                echoContent("Final Step: Open port...");
+                if (Math.random() < 0.5){
+                    echoContent("Failed to open port.");
+                    echoContent("[ FAILED ] Failed to attack. Please try again.");
+                    echoContent("PANDORA BOX - SKILL - FAILED.");
+                    return;
+                }
+                else {
+                    echoContent("Port opened.");
+                    echoContent("Hydra shell opened. Please run commands by your self.");
+                    panbox_hydra_enable = true;
+                    return;
+                }
+                
+            })
+        }
+    }
+
     if (act == "hydra" && act2 == "shell") {
         if (panbox_hydra_enable == false) {
             echoContent("== PLEASE OPEN HYDRA SHELL FIRST. ==");
@@ -279,10 +329,194 @@ newCommand("pandorabox", ["act:string", "act2:string", "act3:string"], function(
         if (act3 == "scanAll") {
             echoContent("Hydra Shell - Scan ALL");
             echoContent("Scanning all ports on this host...");
-            launchTask("Hydra first attack_ports");
+            cmdlineLock(true);
+
+            if (storyWhere === 1002) {
+                echoContent("Found OPEN PORT: 22 (SSH - Secure Shell)");
+                echoContent("Found OPEN PORT: 80 (HTTP! Web server detected.)");
+                echoContent("Found OPEN PORT: 443 (HTTPS? No web server on it.)");
+                echoContent("Found OPEN PORT: 6379 (Redis? Passworded.)");
+                echoContent("Found OPEN PORT: 3306 (MySQL! No password found on.)");
+                echoContent("! 很好！你看到 3306 端口的 'No Password' 了吗？ !");
+                echoContent("! 现在你可以尝试连接 MySQL 服务器，通过注入来获取 web shell. !");
+                echoContent("! 试试 hydra shell mysql.connect !");
+                storyWhere = 1003;
+                cmdlineLock(false);
+                echoContent("Hydra Shell - Scan ALL - COMPLETED.");
+                return;
+            }
+        }
+
+        else if (act3 == "mysql.connect") {
+            echoContent("Hydra Shell - MySQL Connect");
+            echoContent("Connecting to MySQL server...");
+            
+            if (storyWhere == 1003) {
+                echoContent("! No password MySQL detected, trying no password login...");
+                echoContent("? Login successful. You can use 'hydra shell mysql.run' to run SQL commands.");
+                echoContent("! 现在你可以尝试运行 SQL 命令来获取 web shell. !");
+                echoContent("! 解锁新界面：Help, Status !");
+                showPanel();
+                sideBarEnabled = true;
+                updateStatus(
+                    "173.5.5.3",
+                    "22, 80, 443, 6379, 3306",
+                    "3.9 GiB",
+                    "/bin/mysqld",
+                    "MySQL Cracking..."
+                );
+                updateHelp(
+                    "你可能没用过 MySQL，因此这里会指导你如何注入 Web SHELL。<br/>" +
+                    "首先，你要确认网站的编程语言，比如 PHP, ASP, JSP 等，PHP 最好注入。<br/>" +
+                    "你可以用 hydra shell web.type 来获取。<br/>"
+                )
+                storyWhere = 1004;
+            }
+        }
+
+        else if (act3 == "mysql.run") {
+            echoContent("Hydra Shell - MySQL Run");
+            echoContent("Running SQL command...");
+
+            if (storyWhere == 41005) {
+                echoContent("Invalid SQL command.");
+                updateHelp("恭喜你，你已经成功连接上了 MySQL 服务器！<br/>你接下来可以看看里面有哪些表。使用 'show tables'!");
+                storyWhere = 1005;
+            }
+
+            else if (storyWhere == 1005) {
+                echoContent("show tables;");
+                echoContent("+--------------+");
+                echoContent("| Tables_in_web|");
+                echoContent("+--------------+");
+                echoContent("| users        |");
+                echoContent("| content      |");
+                echoContent("+--------------+");
+
+                updateHelp("看到了吗？有两个表，users 和 content。<br/>你可以使用 'select * from users;' 来查看 users 表的内容。");
+                storyWhere = 1006;
+            }
+
+            else if (storyWhere == 1006) {
+                echoContent("select * from users;");
+                echoContent("+----+----------+--------------------------+----------+");
+                echoContent("| id | username | password                 | email    |");
+                echoContent("+----+----------+--------------------------+----------+");
+                echoContent("|  1 | admin    | woCaoNiMaDeJianPuZhai    | admin@web|");
+                echoContent("|  2 | user     | 123456                   | user@web |");
+                echoContent("+----+----------+--------------------------+----------+");
+
+                updateHelp("明文存密码...高手！这让我想起了 C*DN...<br/>不管了，现在重新 webtry，试试看能不能登录进去。");
+                storyWhere = 1007;
+            }
+        }
+
+        else if (act3 == "web.type") {
+            echoContent("Hydra Shell - Web Server Language Type");
+            echoContent("Scanning web server language...");
+
+            if (storyWhere == 1004) {
+                echoContent("Web Server Language Detected: PHP 7.4");
+                echoContent("! 现在你可以尝试注入 web shell 了。 !");
+                updateHelp(
+                    "好了，这个网站是 PHP 写的，接下来你可以尝试注入 web shell 了。<br/>" +
+                    "注入方法有很多种，最简单的就是通过文件上传漏洞，SQL 注入来获取 web shell。<br/>" +
+                    "因为我们没有后台管理员等，没有上传方式，但是我们有 SQL。<br/>"+
+                    "尝试使用 pandorabox hydra webtry 173.5.5.3 来查看 PHP 网页吧。<br/>"
+                );
+                echoContent("! 追加了新的命令：webtry !");
+            }
+        }
+
+        else if (act3 == "webtry") {
+            echoContent("Hydra Shell - Web Try");
+            echoContent("Trying to get PHP web page...");
+
+            if (storyWhere == 1004) {
+                echoContent("Hold on, fetching index...");
+                loadWebTry("1004");
+                updateHelp("你应该看到了它的登录页面吧！<br/>你现在就可以进入 mysql.run 进行操作了。");
+                storyWhere = 41005;
+            }
+
+            else if (storyWhere == 1007) {
+                echoContent("Hold on, fetching admin page...");
+                loadWebTry("1004_1");
+                updateHelp("现在登录管理后台。");
+                newContact("drom-contact-locals-1", "true", function() {
+                    updateHelp("恭喜🎉 登录成功。实战中不会明文存密码的，所以你不会这么容易就进来。<br/>接下来，你可以尝试 SQL Inject 了。");
+                    echoContent("! 接下来，重新回到 webtry 界面，跟着我学习。 !")
+                    storyWhere = 1008;
+                });
+            }
+
+            else if (storyWhere == 1008) {
+                echoContent("Hold on, fetching admin...");
+                loadWebTry("1004_3");
+                updateHelp("接下来，你该试试 capture 功能了。");
+                echoContent("! 追加了新的命令：capture !");
+            }
+
+            else if (storyWhere == 1009) {
+                echoContent("Hold on, fetching admin...");
+                loadWebTry("1004_4");
+                updateHelp("尝试在用户名和密码处注入 SQL 语句，比如 \" ' OR 1=1 \"。");
+                newContact("drom-contact-locals-3", "true", function() {
+                    updateHelp("恭喜你，成功 SQL Inject 了！<br/>现在，你已经掌握了基本的注入方法，接下来可以尝试更多的注入方式了。<br/>但由于作者不想写了，目前就到这里。");
+                    storyWhere = 1010;
+                });
+            }
         }
     }
 }, 8);
+
+newCommand("capture", ["action:string", "target:string"], function(api) {
+    let act = api.args[0];
+    let target = api.args[1];
+
+    if (act == "help" || act == "") {
+        echoContent("NetworkCapturer - Help");
+        echoContent("Usage: capture [action] [target]");
+        echoContent("");
+        echoContent("该软件用于拦截网络数据包，并从中提取有用信息。");
+        echoContent("Action:");
+        echoContent("  help - 显示帮助信息");
+        echoContent("  start - 开始捕获数据包");
+        echoContent("  stop - 停止捕获数据包");
+        echoContent("  save - 保存捕获的数据包");
+        echoContent("  load - 加载保存的数据包");
+        echoContent("");
+        echoContent("BeAction:");
+        echoContent("    即被动，用于监听网络流量，监听到网络数据包时会弹出新窗口。");
+        if (storyWhere === 1008) 
+            updateHelp("现在使用 capture start 来开始捕获数据包吧。");
+    }
+
+    else if (act == "start") {
+        if (storyWhere === 1008) {
+            updateHelp("很好！接下来，随便乱填登录信息，然后登录看看。");
+            echoContent("! 现在你可以尝试登录了。 !");
+            newContact("drom-contact-locals-2", "true", function() {
+                updateHelp("你看到了抓包信息吗？抓包信息里有用户名和密码。<br/>你可以发现，这里没有进行任何处理，直接请求，我们便可以利用这东西来注入。<br/>现在，关掉 webtry 页面和 capture 页面，重新 webtry。");
+                storyWhere = 1009;
+            });
+        }
+
+        echoContent("NetworkCapturer - Starting packet capture...");
+        var capture_interval = setInterval(function() {
+            let packInfo = localStorage.getItem("droml-webtry-captured-packet");
+            if (packInfo) {
+                echoContent("NetworkCapturer - Packet captured!");
+                let ip = packInfo.ip || "127.0.0.1";
+                let sender = packInfo.sender || "Chromium";
+                let more = packInfo.more;
+
+                loadCapturer(ip, sender, more);
+                clearInterval(capture_interval);
+            }
+        }, 100);
+    }
+})
 
 newCommand("base64", ["action:string", "content:string"], function(api){
     var act = api.args [0]
@@ -450,5 +684,81 @@ newCommand("mpm", ["action:string", "more:string"], function(api){
             echoContent("! 召唤 manAI 吧。 !");
         }
         return;
+    }
+});
+
+newCommand("debug", ["action:string", "setvalue:string"], function(api){
+    let act = api.args [0];
+    let setvalue = api.args [1];
+
+    if (act == "114514191981012251224") {
+        debug = true;
+        echoContent("YOU ARE NOW IN DEBUG MODE.");
+    }
+
+    if(!debug) {
+        echoContent("DEBUGGING? NOT DEBUGGING. DEBUGGING? NOT DEBUGGING.");
+        return;
+    }
+
+    if (act === "sw") {
+        storyWhere = parseInt(setvalue);
+        echoContent("DEBUG: storyWhere set to " + storyWhere);
+    }
+
+    else if (act === "swcheck") {
+        echoContent("DEBUG: storyWhere is " + storyWhere);
+    }
+
+    else if (act === "phe") {
+        panbox_hydra_enable = (setvalue.toLowerCase() === "true");
+        echoContent("DEBUG: panbox_hydra_enable set to " + panbox_hydra_enable);
+    }
+
+    else if (act === "phecheck") {
+        echoContent("DEBUG: panbox_hydra_enable is " + panbox_hydra_enable);
+    }
+
+    else if (act === "phme") {
+        panbox_hydra_mysql_enable = (setvalue.toLowerCase() === "true");
+        echoContent("DEBUG: panbox_hydra_mysql_enable set to " + panbox_hydra_mysql_enable);
+    }
+
+    else if (act === "phmecheck") {
+        echoContent("DEBUG: panbox_hydra_mysql_enable is " + panbox_hydra_mysql_enable);
+    }
+
+    else if (act == "save") {
+        saveState();
+        echoContent("DEBUG: State saved.");
+    }
+
+    else if (act == "load") {
+        loadState();
+
+        echoContent("DEBUG: State loaded.");
+    }
+
+    else if (act == "sidebar") {
+        sideBarEnabled = (setvalue.toLowerCase() === "true");
+        echoContent("DEBUG: sideBarEnabled set to " + sideBarEnabled);
+    }
+
+    else if (act == "help") {
+        echoContent("DEBUGGING COMMAND HELP");
+        echoContent("sw: storyWhere setting, sw [where]");
+        echoContent("[xx]check: show value of [xx]");
+        echoContent("save: save current state");
+        echoContent("load: load last saved state");
+        echoContent("sidebar: enable/disable sidebar, sidebar [true/false]");
+        echoContent("phe: pandorabox_hydra_enable setting, phe [true/false]");
+        echoContent("phme: pandorabox_hydra_mysql_enable setting, phme [true/false]");
+        echoContent("pheme: pandorabox_hydra_enable and pandorabox_hydra_mysql_enable setting, pheme [true/false]")
+    }
+
+    else if (act == "pheme") {
+        panbox_hydra_enable = (setvalue.toLowerCase() === "true");
+        panbox_hydra_mysql_enable = (setvalue.toLowerCase() === "true");
+        echoContent("DEBUG: panbox_hydra_enable and panbox_hydra_mysql_enable set to " + panbox_hydra_enable);
     }
 });
