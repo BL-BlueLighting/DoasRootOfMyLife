@@ -2,13 +2,12 @@
   <img src="./README.logo.png" style="width: 100px; height: 100px;">
   <h1>doas -su mylife.root</h1>
   <p>- 别名 DoasRootOfMyLife -</p>
-  <p>仓库上的链接有点慢，如果你觉得真的很慢可以访问 <a href="https://bl-bluelighting.github.io/DoasRootOfMyLife">Github.io 链接</a></p>
 </div>
 
 
 # 目前进度
     - 序章：开发完成，剧情就是普通拯救自己；
-    - 第一章：正在开发中，剧情待定；
+    - 第一章：开发完成，剧情为老友重回，学会 sql injects (菜鸟级的那种)
 
 # 架构介绍
     - base.js: 基本框架，提供了游戏进行的必要函数；
