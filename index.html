@@ -85,7 +85,7 @@ a:hover {
         <p>章节选择</p>
         <ul style="list-style:none;padding:0;margin:0;">
             <li><a href="./content/chapters/pre/chapter.html" class="launch">序章 - 意外而来</a></li>
-            <li><a href="./content/chapters/first/chapter.html" class="launch">第一章 - 探索空间 (未完成)</a></li>
+            <li><a href="./content/chapters/first/chapter.html" class="launch">第一章 - 探索空间</a></li>
             <li><a href="https://github.com/BL-BlueLighting/DoasRootOfMylife" target="_blank">doas -su mylife.root - 开源仓库</a></li>
             <li><a href="./development" class="launch">doas -su mylife.root - commands.js 编写教程</a></li>
         </ul>
@@ -98,13 +98,17 @@ a:hover {
 // ======= 输出内容 =======
 const bootText = `HumanOS Core v6.15.3
 :: Pulling humand
+
 :: HumanDaemon v6235.33.12
 [ OK ] Ready to initialize.
+
 [ WAIT ] Loading base service...
 [ SUCCESS ] Successfully to load base services.
+
 [ WAIT ] Trying to connect brainet...
 [ WARNING ] Your connection to brainet is not safety.
 [ SUCCESS ] Brainet is connected.
+
 [ WAIT ] Pulling humanSchedule
 
 :: HumanSchedule v6233.33.52
@@ -119,6 +123,17 @@ const bootText = `HumanOS Core v6.15.3
 [ SUCCESS ] HumanDaemon connection client started.
 [ INFO ] BIP: brain.humandaemon, Port: 67716.
 [ INFO ] Daemon BIP: brain.humanbms.client.hd, Port: 19198, BID: 3265
+
+:: Human Memory Package Manager Service v53621.23.125
+[ WAIT ] Waiting for HumanBMS service...
+[ SUCCESS ] HMPMS is launched with HBMS and HD.
+[ INFO ] Hold on...
+
+[ WAIT ] Downloading update package...
+[ INFO ] You disabled update skill.
+[ INFO ] Update progress will be not launched.
+
+[ SUCCESS ] HMPMS is loaded.
 
 :: HumanSystemInitializingModule started.
 [ INFO ] HSIM started.
