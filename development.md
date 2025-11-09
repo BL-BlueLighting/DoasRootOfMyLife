@@ -3,6 +3,7 @@
   <h1>doas -su mylife.root</h1>
   <p>- 别名 DoasRootOfMyLife -</p>
   <h2>二次开发须知</h2>
+  <h3><a href="./development_struct">二次开发项目结构</a></h3>
 </div>
 
 # base.js - doas -su mylife.root Base Framework
@@ -123,6 +124,24 @@ api 提供了以下东西：
 `echoContent` 函数用于输出内容，但添加间隔，格式如下：
 
     echoContent(content, [输出内容的 element，请使用 output global var.], delay=30 (ms), callback=[回调函数，可以写为 function(){}，但不能为 undefined 或 null])
+
+## loadWebTry 函数
+`loadWebTry` 负责启动 WebTry，Webtry 是一个使用 webtry.html?pageid=[id] 来进行 webtry 的东西。
+参数如下：
+
+    page_id：即在游戏目录下 webtries/[page_id].html。
+
+它会启动一个弹出窗口让用户交互。
+
+## loadCapturer 函数
+`loadCapturer` 负责启动 capturer GUI，其基于 `loadWebTry`，放在 webtries/capturer.html 目录下。
+参数如下：
+
+    ip: 即 capturer 抓到的 ip。
+    sender: 即 capturer 抓到的 sender，推荐填写 'Chromium' 而不是 'Google Chrome'。
+    more: 即包信息，推荐参照 Burpsuite 格式来写。
+
+和 webtry 一样。
  
 # achieve.js - doas -su mylife.root Achievement Framework
 
@@ -158,36 +177,48 @@ api 提供了以下东西：
 ## lookAchieves 函数
 `lookAchieve` 函数用于遍历并列出所有用户获得的成就。（仅限**该游戏**）
 
-# taskSys.js - doas -su mylife.root - Task System Framework
+# webtryContact.js - doas -su mylife.root - Webtry Contact Service Framework.
+## newContact 函数
+`newContact` 函数用于创建网页通信，其参数如下：
 
-## newTask 函数
-`newTask` 函数用于创建一个任务，函数调用方法如下：
+    key: 通信昵称，即 localStorage Key。
+    whenValue: 调用 callback 的时机（即 key 什么时候 == whenValue）。
+    callback: 回调函数。
 
-    newTask(name, callback, storyWhereNeed)
+其原理：
 
-示例：`newTask("aTask", function() { console.log("Task!") }, 0)`
+    因为需要运行在网页前端，因此只能 localStorage 通信。
+    newContact 会生成 interval，每秒查询 localStorage，当 webtry 页面更新时，第一时间便会调用 callback();
 
-**storyWhereNeed 指需要的 storyWhere 值，条件 storyWhere >= storyWhereNeed**
+## setContact 函数
+`setContact` 函数用于和 `newContact` 函数沟通，其参数如下：
 
-## launchTask 函数
-`launchTask` 函数用于启动任务，函数调用方法如下：
+    key: 参照 newContact。
+    value: 即 whenValue，也可以不是这个。
 
-    launchTask(name)
+其原理：
 
-示例：`launchTask("aTask")`
+    参照 `newContact`。
 
-## DEBUGGING / showTaskInfo 函数
-`showTaskInfo` 函数用于调试，函数调用方法如下：
+# sidebar.js - doas -su mylife.root - Sidebar Service Framework.
+## showPanel 函数
+`showPanel` 函数用于启动网页右边的侧边栏，您可以在 github.io 上使用该命令显示。
+无参数。
 
-    showTaskInfo(name)
+## updateStatus 函数
+`updateStatus` 函数用于更新右边侧边栏的状态信息，和 showPanel 差不多。
+参数如下：
 
-示例：`showTaskInfo("aTask")`
+    ip: 自定义，默认 127.0.0.1
+    ports: 自定义，默认 22
+    mem: 自定义，默认 739MiB（不会自动添加单位哦）
+    cucontent: 其他信息，推荐填写 "" 而不是 undefined.
 
-## DEVELOPMENTING / allTask 函数
-`allTask` 函数用于获取所有任务，函数调用方法如下：
+## updateHelp 函数
+`updateHelp` 函数用于更新右边侧边栏的帮助信息。
+参数如下：
 
-    allTask()
+    content: 帮助内容
 
-示例：`allTask()`
 
--- BL.BlueLighting，最后一次更新 2025 / 10 / 10。
+-- BL.BlueLighting，最后一次更新 2025 / 11 / 09。

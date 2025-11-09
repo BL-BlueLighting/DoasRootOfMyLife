@@ -462,7 +462,7 @@ newCommand("pandorabox", ["act:string", "act2:string", "act3:string"], function(
                 loadWebTry("1004_4");
                 updateHelp("尝试在用户名和密码处注入 SQL 语句，比如 \" ' OR 1=1 \"。");
                 newContact("drom-contact-locals-3", "true", function() {
-                    updateHelp("恭喜你，成功 SQL Inject 了！<br/>现在，你已经掌握了基本的注入方法，接下来可以尝试更多的注入方式了。<br/>但由于作者不想写了，目前就到这里。");
+                    updateHelp("恭喜你，成功 SQL Inject 了！<br/>现在，你已经掌握了基本的注入方法，接下来可以尝试更多的注入方式了。<br/>-- 第二章 拉开序幕 --");
                     storyWhere = 1010;
                 });
             }
