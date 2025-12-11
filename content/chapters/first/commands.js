@@ -579,31 +579,8 @@ newCommand("1534852388", [], function(api){
 // SPE: CHECKING
 newCommand("check", ["id:string"], function(api) {
     if (storyWhere === 5) {
-        // 请求 check 服务器
-        /*
-        const Http = new XMLHttpRequest();
-        const url='https://airoj.latingtude-studios.icu/trrrricks/checking.php?id=' + api.args [0];
-        Http.open("GET", url);
-        Http.send();
-
-        Http.onreadystatechange = (e) => {
-            if (Http.readyState == 4 && Http.status == 200) {
-                var content = JSON.stringify(Http.requestText);
-                console.log(Http.requestText);
-                console.log(content);
-                if (content.status == true) {
-                    // 我去，这 b 通过了
-                    storyWhere = 501;
-                    echoContent("YOU CLEARED DOOR OF doas -su mylife.root，话说你真的好闲啊。");
-                }
-            }
-        }*/ // 旧请求方法，已弃用
-        $.ajax({url: "https://airoj.latingtude-studios.icu/trrrricks/checking.php?id=" + api.args [0], success: function(result){
-            if (result.indexOf("true") != -1) { // json 转化不生效，直接用 search 了
-                storyWhere = 501; // wtf, he passed;
-                echoContent("YOU CLEARED. - 你真的好闲啊，可以进行下一步了。");
-            }
-        }});
+        storyWhere = 501;
+        // 因为服务器验证服务关闭，直接501
     }
 });
 

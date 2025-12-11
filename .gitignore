@@ -1,2 +1,8 @@
 node_modules
 node_modules/*
+*.py
+md5cracking
+output/*
+output
+*.json
+ign*.*

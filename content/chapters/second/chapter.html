@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>doas -su mylife.root - CHAPTER 3</title>
+  <style>
+    :root{
+      --bg:#0b0f14;
+      --panel:#0f1620;
+      --text:#e6eef6;
+      --muted:#9fb0c8;
+      --green:#00ff7f;
+    }
+    html,body{
+      height:100%;
+      margin:0;
+      font-family:ui-monospace,Consolas,monospace;
+      background:var(--bg);
+      color:var(--text);
+    }
+    .layout{
+      display:flex;
+      height:100vh;
+      width:100%;
+      box-sizing:border-box;
+    }
+    .terminal-wrap{
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      padding:16px;
+      box-sizing:border-box;
+    }
+    .term{
+      background:linear-gradient(180deg,#081017 0%, #0b1420 100%);
+      border-radius:8px;
+      flex:1;
+      display:flex;
+      flex-direction:column;
+      overflow:hidden;
+      box-shadow:0 6px 30px rgba(0,0,0,0.6);
+    }
+    .term-output{
+      flex:1;
+      padding:12px 14px;
+      overflow:auto;
+      white-space:pre-wrap;
+      font-size:13px;
+      line-height:1.4;
+    }
+    .term-input{
+      display:flex;
+      align-items:center;
+      padding:10px;
+      border-top:1px solid rgba(255,255,255,0.05);
+    }
+    .prompt{
+      padding-right:8px;
+      color:var(--muted);
+      min-width:60px;
+    }
+    input.cmdline{
+      flex:1;
+      background:transparent;
+      border:0;
+      outline:0;
+      color:var(--text);
+      font:inherit;
+      padding:6px;
+    }
+
+    /* ===== 右侧信息面板 ===== */
+    .side-panel{
+      width:260px;
+      background:var(--panel);
+      border-left:2px solid #1e2630;
+      box-shadow:inset 0 0 20px rgba(0,0,0,0.4);
+      display:flex;
+      flex-direction:column;
+      padding:12px;
+      box-sizing:border-box;
+      transition: all 0.3s ease;
+    }
+    .side-panel.hidden{
+      display:none;
+    }
+    .panel-section{
+      margin-bottom:20px;
+      border:1px solid rgba(255,255,255,0.05);
+      border-radius:6px;
+      padding:10px;
+      background-color:rgba(255,255,255,0.02);
+    }
+    .panel-section h3{
+      margin:0 0 8px;
+      font-size:14px;
+      color:var(--green);
+      border-bottom:1px solid rgba(255,255,255,0.1);
+      padding-bottom:4px;
+    }
+    .panel-section pre, .panel-section p{
+      margin:0;
+      font-size:13px;
+      color:var(--text);
+      white-space:pre-wrap;
+      line-height:1.4;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <!-- 左侧终端 -->
+    <div class="terminal-wrap">
+      <div class="term" id="term">
+        <div class="term-output" id="output" role="log" aria-live="polite"></div>
+        <div class="term-input">
+          <div class="prompt" id="prompt">root@humanos:~$</div>
+          <input id="cmdline" class="cmdline" autocomplete="off" spellcheck="false" autofocus />
+        </div>
+      </div>
+    </div>
+
+    <!-- 右侧隐藏面板 -->
+    <div class="side-panel hidden" id="sidePanel">
+      <div class="panel-section" id="helpSection">
+        <h3>Help - 帮助</h3>
+        <pre id="helpContent">暂无帮助内容。</pre>
+      </div>
+
+      <div class="panel-section" id="statusSection">
+        <h3>Status - 信息</h3>
+        <pre id="statusContent">
+IP: <span id="com_status_ip">0.0.0.0</span>
+Ports: <span id="com_status_ports">none</span>
+Mem: <span id="com_status_mem">739MiB</span>
+Now Running: <span id="com_status_norun">/bin/humansh</span>
+
+<span id="com_status_cucontent"></span>
+        </pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 脚本部分（保持原样） ===== -->
+  <script src="../../requirements/jquery.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/js-base64@3.7.8/base64.min.js"></script>
+  <script src="../../requirements/base.js"></script>
+  <script src="../../requirements/achieve.js"></script>
+  <script src="../../requirements/sidebar.js"></script>
+  <script src="../../requirements/webtryContact.js"></script>
+  <script src="./commands.js"></script>
+</body>
+</html>
