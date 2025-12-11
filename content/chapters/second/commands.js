@@ -70,6 +70,8 @@ if (sideBarEnabled) {
     updateStatus();
 }
 
+var nowDirectory = "/";
+
 // 主要程序部分 //
 
 newCommand("help", [], function(api) {
@@ -79,4 +81,66 @@ newCommand("help", [], function(api) {
 newCommand("manAI", [], function(api) {
     if (storyWhere == 0) 
         echoContent("[ ERROR ] Failed to call manAI server.\n[ ERROR ] It seems like the manAI core was corrupted.");
+});
+
+newCommand("ls", [], function(api) {
+    if (storyWhere == 0) {
+        echoContent("Please authentication first.");
+        pwd = ask("[sudo] password for owner-body: ", function(answer) {
+            if (answer == "rickroll") {
+                window.location.href = "https://nggyu.latingtude-studios.icu";
+            }
+            else if (answer == "%%%humanOS&&&defaultpwd&&&3912499594768843") { // 如果你找到了这里，那么，证明了你有自己查找代码的能力。
+                echoContent("Authentication successfully. Welcome back, owner-body.");
+                storyWhere = 1;
+            }
+            else {
+                echoContent("Sorry, password wrong. Please retry.");
+            }
+        });
+    }
+    else if (storyWhere == 1) {
+        if (nowDirectory == "/")
+            echoContent("/manAI /log /var /home");
+        else if (nowDirectory == "/manAI")
+            echoContent("manAIcore.model manAIdata.db manAImemory.db");
+        else if (nowDirectory == "/log")
+            echoContent("tcbk-manAI-2025-12-09-12h-24m-56s.log");
+        else if (nowDirectory == "/var")
+            echoContent("Permission denied.");
+        else if (nowDirectory == "/home")
+            echoContent("Permission denied.");
+    }
+})
+
+newCommand("cd", ["dir:string"], function(api) {
+    if (storyWhere == 1) {
+        var dirs = ["manAI", "log", "var", "home"];
+        if (dirs.indexOf(api.args [0]) < 0 && api.args [0] !== "..") {
+            echoContent("File or directory not found.");
+            return;
+        }   
+        else if (api.args [0] == "..") {
+            nowDirectory = "/";
+        }
+        else
+            nowDirectory += api.args [0];
+    }
+});
+
+newCommand("checkdata", ["file:string"], function(api) {
+    if (storyWhere == 1) {
+        echoContent("Checking file data...");
+        gocountdown(function() {
+            echoContent("[ [color: green]FOUND[/endcolor] ] A file named '/manAI/manAIcore.model' was corrupted.\n[ [color: skyblue]FINFO[/endcolor] ] Fix it now?");
+            ask("[Y/n]", function(ans) {
+                if (ans !== "n") {
+                    echoContent("Hold on, running fix process...");
+                    gocountdown(function() {
+                        echoContent("[ [color: red]FAILED[/endcolor] ] File named '/manAI/manAIcore.model' fix failed. Please check its permission then retry.");
+                    }, 100);
+                }
+            });
+        }, 100);
+    }
 });

@@ -20,7 +20,7 @@
         // 创建并注入CSS样式
         if (!document.getElementById('countdown-styles')) {
             if (document.getElementById('countdown-styles')) {
-                document.head.removeChild(document.getElementById('countdown-styles'));
+                document.getElementById('countdown-styles').remove();
             }
 
             const style = document.createElement('style');
