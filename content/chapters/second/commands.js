@@ -79,7 +79,7 @@ newCommand("help", [], function(api) {
 });
 
 newCommand("manAI", [], function(api) {
-    if (storyWhere == 0) 
+    if (storyWhere == 0 || storyWhere == 1 || storyWhere == 2 || storyWhere == 201) 
         echoContent("[ ERROR ] Failed to call manAI server.\n[ ERROR ] It seems like the manAI core was corrupted.");
 });
 
@@ -99,7 +99,7 @@ newCommand("ls", [], function(api) {
             }
         });
     }
-    else if (storyWhere == 1) {
+    else if (storyWhere == 1 || storyWhere == 2 || storyWhere == 201) {
         if (nowDirectory == "/")
             echoContent("/manAI /log /var /home");
         else if (nowDirectory == "/manAI")
@@ -114,10 +114,10 @@ newCommand("ls", [], function(api) {
 })
 
 newCommand("cd", ["dir:string"], function(api) {
-    if (storyWhere == 1) {
+    if (storyWhere == 1 || storyWhere == 2 || storyWhere == 201) {
         var dirs = ["manAI", "log", "var", "home"];
         if (dirs.indexOf(api.args [0]) < 0 && api.args [0] !== "..") {
-            echoContent("File or directory not found.");
+            echoContent("No such file or directory.");
             return;
         }   
         else if (api.args [0] == "..") {
@@ -125,6 +125,25 @@ newCommand("cd", ["dir:string"], function(api) {
         }
         else
             nowDirectory += api.args [0];
+    }
+});
+
+newCommand("chmod", ["mod:string", "file:string"], function(api) {
+    if (storyWhere == 2) {
+        if (nowDirectory !== "/manAI") {
+            echoContent("No such file or directory.");
+            return;
+        }
+        if (api.args [1] !== "manAIcore.model") {
+            echoContent("Invaild file.");
+            return;
+        }
+
+        if (api.args [0] !== "777") {
+            return;
+        }
+
+        storyWhere = 201;
     }
 });
 
@@ -138,6 +157,22 @@ newCommand("checkdata", ["file:string"], function(api) {
                     echoContent("Hold on, running fix process...");
                     gocountdown(function() {
                         echoContent("[ [color: red]FAILED[/endcolor] ] File named '/manAI/manAIcore.model' fix failed. Please check its permission then retry.");
+                        storyWhere = 2;
+                    }, 100);
+                }
+            });
+        }, 100);
+    }
+    else if (storyWhere == 201) {
+        echoContent("Checking file data...");
+        gocountdown(function() {
+            echoContent("[ [color: green]FOUND[/endcolor] ] A file named '/manAI/manAIcore.model' was corrupted.\n[ [color: skyblue]FINFO[/endcolor] ] Fix it now?");
+            ask("[Y/n]", function(ans) {
+                if (ans !== "n") {
+                    echoContent("Hold on, running fix process...");
+                    gocountdown(function() {
+                        echoContent("[ [color: green]SUCCESS[/endcolor] ] File named '/manAI/manAIcore.model' fix successfully. Used space 20.8Gigabytes.");
+                        storyWhere = 3;
                     }, 100);
                 }
             });
