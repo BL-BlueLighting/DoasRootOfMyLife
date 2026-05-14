@@ -1,0 +1,33 @@
+{
+  "name": "doas-cli",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "doas -su mylife.root - CLI edition with Ink",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "bundle": "npx ncc build dist/index.mjs --out bundle --minify",
+    "exe": "npx pkg bundle/index.mjs --targets node20-win-x64 --output dist/doas.exe --public",
+    "make": "tsc && npm run bundle && npm run exe",
+    "start": "tsc && node dist/index.js",
+    "dev": "tsc && node dist/index.js"
+  },
+  "pkg": {
+    "assets": [
+      "dist/**/*.js",
+      "node_modules/**/*"
+    ]
+  },
+  "dependencies": {
+    "ink": "^5.0.1",
+    "react": "^18.3.1",
+    "react-devtools-core": "^4.28.5"
+  },
+  "devDependencies": {
+    "@types/node": "^25.7.0",
+    "@types/react": "^18.3.0",
+    "@vercel/ncc": "^0.38.4",
+    "@yao-pkg/pkg": "^6.19.0",
+    "typescript": "^5.5.0"
+  }
+}
