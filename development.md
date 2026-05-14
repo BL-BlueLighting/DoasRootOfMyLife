@@ -6,6 +6,26 @@
   <h3><a href="./development_struct">二次开发项目结构</a></h3>
 </div>
 
+## Start up
+首先，您需要 Node.js (ver > 20)，并安装 npm。
+然后：
+```bash
+npm install
+npm run dev
+```
+(没啦)
+国内玩家需要科学上网才能安装依赖，若您不想科学上网，请修改 npm 源或使用 cnpm，安装完成后就不需要了。
+
+修改 npm 源:
+```bash
+npm config set registry https://registry.npmmirror.com
+```
+
+安装 cnpm:
+```bash
+npm install -g cnpm --registry=https://registry.npmmirror.com
+```
+
 # engine.ts - doas -su mylife.root 核心引擎
 
 doas-cli 使用 **Ink**（终端版 React）+ **TypeScript** 构建，运行于 Node.js。与旧版 web 架构完全不同，请仔细阅读。

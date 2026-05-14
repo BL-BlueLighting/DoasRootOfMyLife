@@ -4,6 +4,11 @@
   <p>- 别名 DoasRootOfMyLife -</p>
 </div>
 
+# 注意
+注意，目前 main branch 为 node.js (即 React Ink) 版 CLI，功能不完整，
+需手动 start up。
+若您希望游玩，先下载本仓库，然后参照 <a href="./development.md">开发教程</a> 部署并启动。
+若您不想 start up，请查看 old 分支。
 
 # 目前进度
 - 序章：开发完成，剧情就是普通拯救自己；
@@ -34,10 +39,10 @@ Chapter 1 中的 SudoerOfMyself 在 Github 也有仓库，链接 <a href="https:
 
 # 如何创建自己的改版？
 很简单，查看 <a href="https://bl-bluelighting.github.io/DoasRootOfMyLife/development">二次开发须知</a>
-后自己写一份 commands.js 替换原版的就可以了。
+后自己写一份 `<chaptername>.ts` 替换原版的就可以了。
 
 然后在**本仓库**提 Issue，@我让我添加到下面这个列表，或者你自己加，提 PR 并 @ 我。
 
 | 改版作者 / Author      | 仓库链接 / Repo links | 改版昵称 / Name of version |
 | ----------- | ----------- | ----------- |
-| BL.BlueLighting      | <a href="https://github.com/BL-BlueLighting/DoasRootOfMyLife">本仓库</a>       | doas -u mylife.root 原版 |
+| BL.BlueLighting      | <a href="https://github.com/BL-BlueLighting/DoasRootOfMyLife">本仓库</a>       | doas -su mylife.root 原版 |
