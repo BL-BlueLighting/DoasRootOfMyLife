@@ -2,7 +2,7 @@
 // Port of base.js to TypeScript for CLI
 
 import { parseEchoContent, blocksToLines, OutputLine, OutputBlock } from './parser.js';
-import { loadState, saveState, loadAchieves, saveAchieves, SaveData } from './storage.js';
+import { loadState, saveState, loadAchieves, saveAchieves, loadProfile, saveProfile, SaveData, ProfileData } from './storage.js';
 import { webServer } from './webserver.js';
 
 export interface CommandAPI {
@@ -34,6 +34,7 @@ export interface GameState {
   contextVars: Record<string, unknown>;
   history: string[];
   achieves: string[];
+  currentDir: string;
 }
 
 export interface PanelStatus {
@@ -44,6 +45,14 @@ export interface PanelStatus {
   extra: string;
 }
 
+export type FileContent = string | ((engine: GameEngine) => void | string | Promise<void | string>);
+
+export interface FileEntry {
+  content: FileContent;
+  storyWhereMin: number;
+  storyWhereMax?: number;
+}
+
 type WriteLineFn = (line: OutputLine) => void;
 type WriteBlockFn = (block: OutputBlock) => void;
 type AskFn = (prompt: string, callback: (response: string) => void) => void;
@@ -51,6 +60,7 @@ type LockInputFn = (locked: boolean) => void;
 type ExitProgramFn = () => void;
 type ClearOutputFn = () => void;
 type PanelUpdateFn = (status: PanelStatus) => void;
+type PromptUpdateFn = (prompt: string) => void;
 
 export class GameEngine {
   private commands = new Map<string, CommandEntry>();
@@ -68,10 +78,29 @@ export class GameEngine {
   private onClear: ClearOutputFn = () => {};
   private onExit: ExitProgramFn = () => {};
   private onPanel: PanelUpdateFn = () => {};
+  private onPrompt: PromptUpdateFn = () => {};
   private callbacksSet = false;
   private pendingLines: OutputLine[] = [];
 
-  // Panel status
+  // User profile (global across chapters)
+  private profile: ProfileData = { username: '', hostname: 'humanos' };
+
+  // Virtual filesystem tree
+  private dirTree: Record<string, string[]> = {
+    '/': ['home', 'etc', 'tmp', 'var'],
+    '/home': [],
+    '/etc': ['hosts', 'passwd'],
+    '/tmp': [],
+    '/var': ['log', 'run'],
+    '/var/log': [],
+    '/var/run': [],
+  };
+
+  // Virtual file contents
+  private fileContents: Record<string, FileEntry> = {};
+
+  // Restricted directories (ls/cd will show "Permission denied")
+  private restrictedDirs: Set<string> = new Set();
   private panelStatus: PanelStatus = {
     visible: false,
     ip: '127.0.0.1',
@@ -91,7 +120,25 @@ export class GameEngine {
       contextVars: {},
       history: [],
       achieves: [],
+      currentDir: '~',
     };
+
+    // Load global profile
+    const profile = loadProfile();
+    if (profile) {
+      this.profile = profile;
+      // Ensure home dir exists in tree
+      const homeDir = `/home/${this.profile.username}`;
+      if (!this.dirTree['/home'].includes(this.profile.username)) {
+        this.dirTree['/home'].push(this.profile.username);
+      }
+      if (!this.dirTree[homeDir]) {
+        this.dirTree[homeDir] = ['documents', 'downloads', 'projects'];
+        this.dirTree[`${homeDir}/documents`] = [];
+        this.dirTree[`${homeDir}/downloads`] = [];
+        this.dirTree[`${homeDir}/projects`] = [];
+      }
+    }
   }
 
   // Wire up UI callbacks
@@ -102,6 +149,7 @@ export class GameEngine {
     clear: ClearOutputFn,
     exit: ExitProgramFn,
     panel?: PanelUpdateFn,
+    prompt?: PromptUpdateFn,
   ): void {
     this.onWrite = write;
     this.onAsk = ask;
@@ -109,12 +157,15 @@ export class GameEngine {
     this.onClear = clear;
     this.onExit = exit;
     if (panel) this.onPanel = panel;
+    if (prompt) this.onPrompt = prompt;
     this.callbacksSet = true;
     // Flush pending output
     for (const line of this.pendingLines) {
       this.onWrite(line);
     }
     this.pendingLines = [];
+    // Push initial prompt
+    this.pushPrompt();
   }
 
   private writeLine(line: OutputLine): void {
@@ -135,6 +186,7 @@ export class GameEngine {
       this.state.sideBarEnabled = data.sideBarEnabled;
       this.state.contextVars = data.variables;
       this.state.history = data.history;
+      this.state.currentDir = data.currentDir || '~';
     }
     this.state.achieves = loadAchieves(this.gameId);
   }
@@ -148,6 +200,7 @@ export class GameEngine {
       nextStory: this.state.nextStory,
       accessGiven: this.state.accessGiven,
       sideBarEnabled: this.state.sideBarEnabled,
+      currentDir: this.state.currentDir,
     };
     saveState(this.chapterId, data);
     saveAchieves(this.gameId, this.state.achieves);
@@ -163,6 +216,256 @@ export class GameEngine {
   set sideBarEnabled(v: boolean) { this.state.sideBarEnabled = v; }
   get achieves(): string[] { return this.state.achieves; }
   get isAsking(): boolean { return this.asking; }
+  get username(): string { return this.profile.username || 'yourself'; }
+  get hostname(): string { return this.profile.hostname || 'humanos'; }
+  get currentDir(): string { return this.state.currentDir; }
+
+  // ---- Profile ----
+  get isProfileSet(): boolean {
+    return !!this.profile.username;
+  }
+
+  buildPrompt(): string {
+    const user = this.username;
+    const host = this.hostname;
+    const dir = this.state.currentDir;
+    return `${user}@${host}:${dir}$ `;
+  }
+
+  private pushPrompt(): void {
+    if (this.callbacksSet) {
+      this.onPrompt(this.buildPrompt());
+    }
+  }
+
+  /** Ensure profile is set. If not, asks the player for username/hostname. */
+  async ensureProfile(): Promise<void> {
+    if (this.isProfileSet) {
+      this.ensureHomeDir();
+      this.pushPrompt();
+      return;
+    }
+
+    // Ask for username
+    const oldUsername = this.profile.username;
+    await new Promise<void>((resolve) => {
+      this.echoContent('Please complete Setup.', true);
+      this.echoContent("[color: #00eeff]Step 1.[/endcolor] Setup your name and hostname", true);
+      this.ask('What\'s your name?', (answer) => {
+        const name = answer.trim() || 'ropicstu';
+        this.profile.username = name;
+        this.ensureHomeDir();
+        this.rehomeFiles(oldUsername);
+        saveProfile(this.profile);
+        this.pushPrompt();
+        resolve();
+      });
+    });
+
+    // Ask for hostname
+    await new Promise<void>((resolve) => {
+      this.ask('What\'s your brain name?', (answer) => {
+        this.profile.hostname = answer.trim() || 'humanos';
+        saveProfile(this.profile);
+        this.pushPrompt();
+        this.echoContent(`[color: #0f0]Step 1 completed.[/endcolor]\nYour device(brain): ${this.username}@${this.hostname}`, true);
+      });
+      this.echoContent("Hold down, We are setting your device(brain)...", true);
+      // wait 5 seconds
+      setTimeout(() => {
+        this.echoContent(`Welcome, ${this.username}!`, true);
+        this.echoContent("    - Everything is setup.", true);
+        this.echoContent("    - HumanOS Version: 6.0.0", true);
+        this.echoContent("    - Enjoy.", true);
+        this.echoContent("Copyright (c) 2026 BL.BlueLighting", true);
+        this.ask('Enter, then continue', (answer) => {
+          resolve();
+        })
+      }, 5000);
+    });
+  }
+
+  private ensureHomeDir(): void {
+    const homeDir = `/home/${this.profile.username}`;
+    if (!this.dirTree['/home'].includes(this.profile.username)) {
+      this.dirTree['/home'].push(this.profile.username);
+    }
+    if (!this.dirTree[homeDir]) {
+      this.dirTree[homeDir] = ['documents', 'downloads', 'projects'];
+      this.dirTree[`${homeDir}/documents`] = [];
+      this.dirTree[`${homeDir}/downloads`] = [];
+      this.dirTree[`${homeDir}/projects`] = [];
+    }
+  }
+
+  // Move files from old home dir to new home dir after profile name change
+  rehomeFiles(oldUsername: string): void {
+    const newHome = `/home/${this.profile.username}`;
+    const oldHome = `/home/${oldUsername || 'yourself'}`;
+    if (oldHome === newHome) return;
+    // Copy files from old home to new home
+    for (const [path, entry] of Object.entries(this.fileContents)) {
+      if (path.startsWith(oldHome + '/')) {
+        const newPath = newHome + path.slice(oldHome.length);
+        this.fileContents[newPath] = entry;
+        delete this.fileContents[path];
+      }
+    }
+    // Move dir listings
+    const oldEntries = this.dirTree[oldHome];
+    if (oldEntries && this.dirTree[newHome]) {
+      for (const entry of oldEntries) {
+        if (!this.dirTree[newHome].includes(entry)) {
+          this.dirTree[newHome].push(entry);
+        }
+      }
+    }
+  }
+
+  // ---- Directory system ----
+  resolvePath(raw: string): string {
+    if (!raw || raw === '~') return `/home/${this.profile.username || 'yourself'}`;
+    if (raw === '/') return '/';
+    if (raw === '-') return this.state.currentDir;
+
+    let base: string;
+    let rest: string;
+    if (raw.startsWith('/')) {
+      base = '/';
+      rest = raw.slice(1);
+    } else if (raw.startsWith('~')) {
+      base = `/home/${this.profile.username || 'yourself'}`;
+      rest = raw.startsWith('~/') ? raw.slice(2) : raw.slice(1);
+    } else {
+      base = this.state.currentDir === '~'
+        ? `/home/${this.profile.username || 'yourself'}`
+        : this.state.currentDir;
+      rest = raw;
+    }
+
+    const parts = rest.split('/').filter(Boolean);
+    for (const part of parts) {
+      if (part === '..') {
+        if (base === '/') continue;
+        base = base.substring(0, base.lastIndexOf('/')) || '/';
+      } else if (part === '.') {
+        // stay
+      } else {
+        const candidate = base === '/' ? `/${part}` : `${base}/${part}`;
+        if (this.dirTree[base]?.includes(part) && this.dirTree[candidate]) {
+          base = candidate;
+        } else {
+          return ''; // path not found
+        }
+      }
+    }
+    return base;
+  }
+
+  cd(raw: string): string | null {
+    const resolved = this.resolvePath(raw || '~');
+    if (!resolved) return null;
+    this.state.currentDir = this.toShortPath(resolved);
+    this.pushPrompt();
+    return this.state.currentDir;
+  }
+
+  private toShortPath(absPath: string): string {
+    const homeDir = `/home/${this.profile.username || 'yourself'}`;
+    if (absPath === homeDir || absPath.startsWith(homeDir + '/')) {
+      return '~' + absPath.slice(homeDir.length);
+    }
+    return absPath;
+  }
+
+  ls(dir?: string): string[] {
+    const target = dir ? this.resolvePath(dir) : this.state.currentDir;
+    const absTarget = target === '~'
+      ? `/home/${this.profile.username || 'yourself'}`
+      : target;
+    if (!absTarget || !this.dirTree[absTarget]) return [];
+    const entries = [...this.dirTree[absTarget]];
+    // Add files from fileContents that match storyWhere
+    for (const [filePath, entry] of Object.entries(this.fileContents)) {
+      const parentDir = filePath.substring(0, filePath.lastIndexOf('/')) || '/';
+      if (parentDir !== absTarget) continue;
+      const fileName = filePath.substring(filePath.lastIndexOf('/') + 1);
+      if (entries.includes(fileName)) continue;
+      if (entry.storyWhereMin > this.state.storyWhere) continue;
+      if (entry.storyWhereMax !== undefined && entry.storyWhereMax < this.state.storyWhere) continue;
+      entries.push(fileName);
+    }
+    return entries;
+  }
+
+  pwd(): string {
+    return this.state.currentDir;
+  }
+
+  // Resolve a file path for cat/read operations
+  resolveFilePath(raw: string): string {
+    if (!raw) return '';
+    if (raw.startsWith('/')) return raw;
+    if (raw.startsWith('~')) {
+      const homeDir = `/home/${this.profile.username || 'yourself'}`;
+      return raw === '~' ? homeDir : `${homeDir}/${raw.slice(2)}`;
+    }
+    const base = this.state.currentDir === '~'
+      ? `/home/${this.profile.username || 'yourself'}`
+      : this.state.currentDir;
+    return base === '/' ? `/${raw}` : `${base}/${raw}`;
+  }
+
+  // Add a file to the virtual filesystem (supports ~/ prefix for home-relative paths)
+  addFile(path: string, content: FileContent, storyWhereMin = 0, storyWhereMax?: number): void {
+    const resolvedPath = path.startsWith('~/') ? this.resolveFilePath(path) : path;
+    // Ensure parent directory exists
+    const parentDir = resolvedPath.substring(0, resolvedPath.lastIndexOf('/')) || '/';
+    if (!this.dirTree[parentDir]) {
+      this.mkdirP(parentDir);
+    }
+    this.fileContents[resolvedPath] = { content, storyWhereMin, storyWhereMax };
+  }
+
+  // Read a file from the virtual filesystem (respects storyWhere)
+  catFile(rawPath: string): { content: FileContent; entry: FileEntry } | null {
+    const resolved = this.resolveFilePath(rawPath);
+    if (!resolved) return null;
+    const entry = this.fileContents[resolved];
+    if (!entry) return null;
+    if (entry.storyWhereMin > this.state.storyWhere) return null;
+    if (entry.storyWhereMax !== undefined && entry.storyWhereMax < this.state.storyWhere) return null;
+    return { content: entry.content, entry };
+  }
+
+  // Ensure a directory path exists
+  private mkdirP(absPath: string): void {
+    if (this.dirTree[absPath]) return;
+    const parts = absPath.split('/').filter(Boolean);
+    let current = '/';
+    for (const part of parts) {
+      const next = current === '/' ? `/${part}` : `${current}/${part}`;
+      if (!this.dirTree[current]) this.dirTree[current] = [];
+      if (!this.dirTree[current].includes(part)) {
+        this.dirTree[current].push(part);
+      }
+      if (!this.dirTree[next]) this.dirTree[next] = [];
+      current = next;
+    }
+  }
+
+  // Mark a directory as restricted (ls shows "Permission denied", cd is blocked)
+  addRestrictedDir(absPath: string): void {
+    this.restrictedDirs.add(absPath);
+    // Ensure it exists in the tree so it shows up in parent listings
+    if (!this.dirTree[absPath]) {
+      this.mkdirP(absPath);
+    }
+  }
+
+  isRestrictedDir(absPath: string): boolean {
+    return this.restrictedDirs.has(absPath);
+  }
 
   // ---- Echo content ----
   echoContent(content: string, noSleep = false, delay = 90): void {
@@ -229,6 +532,33 @@ export class GameEngine {
     return tokens;
   }
 
+  cheating(tokens: string[]): void {
+    // enable cheat of this archive
+    if (tokens[0] === 'enable') {
+      this.ask('Enter to enable cheating?', (answer) => {
+        if (answer.trim().toLowerCase() === 'yes') {
+          this.state.contextVars['cheatEnabled'] = true;
+          this.echoContent('Cheating enabled. Use with caution!', true);
+        } else {
+          this.echoContent('Cheating not enabled.', true);
+        }
+      });
+    }
+
+    // set storyWhere
+    if (tokens[0] === 'setStoryWhere' && this.state.contextVars['cheatEnabled']) {
+      const value = parseInt(tokens[1], 10);
+      if (!isNaN(value)) {
+        this.state.storyWhere = value;
+        this.echoContent(`Story position set to ${value}.`, true);
+      } else {
+        this.echoContent('Invalid story position.', true);
+      }
+    }
+
+    // set custom
+  }
+
   // ---- Execute a command line ----
   async executeLine(rawLine: string): Promise<void> {
     if (this.asking) {
@@ -244,44 +574,118 @@ export class GameEngine {
 
     const tokens = this.tokenize(rawLine);
     const cmd = tokens.shift()!;
+
+    // ---- exit (always built-in) ----
+    if (cmd === 'exit') {
+      this.onExit();
+      return;
+    }
+
+    // ---- Chapter commands (checked first so chapters can override built-ins) ----
     const entry = this.commands.get(cmd);
 
-    if (!entry) {
-      this.writeLine({ segments: [{ text: `Command not found: ${cmd}` }] });
-      this.persist();
-      return;
-    }
-
-    if (entry.storyWhereNeed > this.state.storyWhere) {
-      this.writeLine({ segments: [{ text: `Command not found: ${cmd}` }] });
-      this.persist();
-      return;
-    }
-
-    try {
-      const api: CommandAPI = {
-        args: tokens.slice(),
-        context: this.state.contextVars,
-        echo: this.echoContent.bind(this),
-        save: () => this.persist(),
-        setVar: (k, v) => { this.state.contextVars[k] = v; },
-        getVar: (k) => this.state.contextVars[k],
-        storyWhere: this.state.storyWhere,
-        nextStory: this.state.nextStory,
-        setStoryWhere: (v) => { this.state.storyWhere = v; },
-        setNextStory: (v) => { this.state.nextStory = v; },
-      };
-
-      const result = await entry.handler(api);
-      if (typeof result === 'string' && result.startsWith('nextSTEP')) {
-        this.state.nextStory = true;
-        this.state.storyWhere++;
+    if (entry && entry.storyWhereNeed <= this.state.storyWhere) {
+      try {
+        const api: CommandAPI = {
+          args: tokens.slice(),
+          context: this.state.contextVars,
+          echo: this.echoContent.bind(this),
+          save: () => this.persist(),
+          setVar: (k, v) => { this.state.contextVars[k] = v; },
+          getVar: (k) => this.state.contextVars[k],
+          storyWhere: this.state.storyWhere,
+          nextStory: this.state.nextStory,
+          setStoryWhere: (v) => { this.state.storyWhere = v; },
+          setNextStory: (v) => { this.state.nextStory = v; },
+        };
+        const result = await entry.handler(api);
+        if (typeof result === 'string' && result.startsWith('nextSTEP')) {
+          this.state.nextStory = true;
+          this.state.storyWhere++;
+        }
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        this.writeLine({ segments: [{ text: `命令执行出错: ${msg}` }] });
       }
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      this.writeLine({ segments: [{ text: `命令执行出错: ${msg}` }] });
+      this.persist();
+      return;
     }
 
+    // ---- Built-in directory commands (fallback) ----
+    if (cmd === 'cd') {
+      const target = tokens[0] || '~';
+      const resolved = this.resolvePath(target);
+      if (resolved && this.isRestrictedDir(resolved)) {
+        this.writeLine({ segments: [{ text: `cd: permission denied: ${target}` }] });
+        this.persist();
+        return;
+      }
+      const result = this.cd(target);
+      if (result === null) {
+        this.writeLine({ segments: [{ text: `cd: no such directory: ${target}` }] });
+      }
+      this.persist();
+      return;
+    }
+
+    if (cmd === 'pwd') {
+      this.writeLine({ segments: [{ text: this.pwd() }] });
+      this.persist();
+      return;
+    }
+
+    if (cmd === 'ls') {
+      const target = tokens[0];
+      const absTarget = target
+        ? this.resolvePath(target)
+        : (this.state.currentDir === '~'
+          ? `/home/${this.profile.username || 'yourself'}`
+          : this.state.currentDir);
+      if (absTarget && this.isRestrictedDir(absTarget)) {
+        this.writeLine({ segments: [{ text: 'Permission denied.' }] });
+        this.persist();
+        return;
+      }
+      const entries = this.ls(target);
+      if (entries.length === 0) {
+        this.writeLine({ segments: [{ text: '(empty)' }] });
+      } else {
+        const dirList = entries.map((e) => {
+          const candidate = absTarget ? `${absTarget}/${e}` : '';
+          const isDir = candidate && this.dirTree[candidate] !== undefined;
+          return isDir ? `[color: #87ceeb]${e}[/endcolor]` : e;
+        });
+        this.echoContent(dirList.join('  '), true);
+      }
+      this.persist();
+      return;
+    }
+
+    // ---- Built-in cat ----
+    if (cmd === 'cat') {
+      const target = tokens[0];
+      if (!target) {
+        this.writeLine({ segments: [{ text: 'cat: missing file operand' }] });
+        this.persist();
+        return;
+      }
+      const result = this.catFile(target);
+      if (!result) {
+        this.writeLine({ segments: [{ text: `cat: ${target}: No such file or directory` }] });
+      } else if (typeof result.content === 'function') {
+        const ret = await result.content(this);
+        if (typeof ret === 'string') {
+          this.echoContent(ret);
+        }
+      } else {
+        this.echoContent(result.content);
+      }
+      this.persist();
+      return;
+    }
+
+    // Command not found
+    this.writeLine({ segments: [{ text: `Command not found: ${cmd}` }] });
     this.persist();
   }
 
@@ -291,6 +695,11 @@ export class GameEngine {
     if (typeof callback !== 'function') throw new Error('回调函数必须是函数');
     this.asking = true;
     this.askCallback = callback;
+    this.onAsk(prompt, (response: string) => {
+      this.asking = false;
+      this.askCallback = null;
+      callback(response);
+    });
     this.echoContent(prompt);
   }
 

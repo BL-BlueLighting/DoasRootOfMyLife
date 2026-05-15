@@ -3,15 +3,20 @@
 
 import { GameEngine, CommandAPI } from '../engine/engine.js';
 
-let nowDirectory = '/';
-
 export function registerSecondChapter(engine: GameEngine): void {
   // Load state
   engine.load();
-  nowDirectory = '/';
 
   engine.echoContent('Welcome to HumanOS.', true);
   engine.echoContent('Type [color: #0f0]help[/endcolor] to get started.', true);
+
+  // Add chapter directories and files to the virtual filesystem
+  engine.addFile('/manAI/manAIcore.model', '', 1);
+  engine.addFile('/manAI/manAIdata.db', '', 1);
+  engine.addFile('/manAI/manAImemory.db', '', 1);
+  engine.addFile('/log/tcbk-manAI-2025-12-09-12h-24m-56s.log', '', 1);
+  engine.addRestrictedDir('/var');
+  engine.addRestrictedDir('/home');
 
   engine.persist();
 
@@ -33,16 +38,13 @@ export function registerSecondChapter(engine: GameEngine): void {
     }
   });
 
-  // ---- ls ----
+  // ---- ls (custom: auth gate, then delegates to engine) ----
   engine.newCommand('ls', [], function () {
     if (engine.storyWhere === 0) {
       engine.echoContent('Please authentication first.', true);
       engine.ask('[sudo] password for owner-body: ', function (answer: string) {
         if (answer === 'rickroll') {
-          engine.echoContent(
-            'https://nggyu.latingtude-studios.icu',
-            true,
-          );
+          engine.echoContent('https://nggyu.latingtude-studios.icu', true);
         } else if (answer === '%%%humanOS&&&defaultpwd&&&3912499594768843') {
           engine.echoContent('Authentication successfully. Welcome back, owner-body.', true);
           engine.storyWhere = 1;
@@ -50,60 +52,59 @@ export function registerSecondChapter(engine: GameEngine): void {
           engine.echoContent('Sorry, password wrong. Please retry.', true);
         }
       });
-    } else if (
+      return;
+    }
+    if (
       engine.storyWhere === 1 ||
       engine.storyWhere === 2 ||
       engine.storyWhere === 201
     ) {
-      if (nowDirectory === '/') {
-        engine.echoContent('/manAI /log /var /home', true);
-      } else if (nowDirectory === '/manAI') {
-        engine.echoContent('manAIcore.model manAIdata.db manAImemory.db', true);
-      } else if (nowDirectory === '/log') {
-        engine.echoContent('tcbk-manAI-2025-12-09-12h-24m-56s.log', true);
-      } else if (nowDirectory === '/var') {
+      const cur = engine.currentDir === '~'
+        ? `/home/${engine.username}`
+        : engine.currentDir;
+      if (engine.isRestrictedDir(cur)) {
         engine.echoContent('Permission denied.', true);
-      } else if (nowDirectory === '/home') {
-        engine.echoContent('Permission denied.', true);
+        return;
+      }
+      const entries = engine.ls();
+      if (entries.length === 0) {
+        engine.echoContent('(empty)', true);
+      } else {
+        engine.echoContent(entries.join('  '), true);
       }
     }
   });
 
-  // ---- cd ----
+  // ---- cd (custom: auth gate, then delegates to engine) ----
   engine.newCommand('cd', ['dir:string'], function (api: CommandAPI) {
     if (
       engine.storyWhere === 1 ||
       engine.storyWhere === 2 ||
       engine.storyWhere === 201
     ) {
+      const dir = api.args[0] || '~';
       const dirs = ['manAI', 'log', 'var', 'home'];
-      const dir = api.args[0];
-
+      // Only allow cd to chapter-specific dirs from root
       if (dirs.indexOf(dir) < 0 && dir !== '..') {
         engine.echoContent('No such file or directory.', true);
         return;
       }
-
-      if (dir === '..') {
-        nowDirectory = '/';
+      const result = engine.cd(dir);
+      if (result === null) {
+        engine.echoContent('No such file or directory.', true);
       } else {
-        // Only go one level deep
-        if (nowDirectory === '/') {
-          nowDirectory = '/' + dir;
-        } else {
-          engine.echoContent('No such file or directory.', true);
-          return;
-        }
+        engine.echoContent(result, true);
       }
-
-      engine.echoContent(nowDirectory, true);
     }
   });
 
   // ---- chmod ----
   engine.newCommand('chmod', ['mod:string', 'file:string'], function (api: CommandAPI) {
     if (engine.storyWhere === 2) {
-      if (nowDirectory !== '/manAI') {
+      const cur = engine.currentDir === '~'
+        ? `/home/${engine.username}`
+        : engine.currentDir;
+      if (cur !== '/manAI') {
         engine.echoContent('No such file or directory.', true);
         return;
       }

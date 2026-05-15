@@ -1,0 +1,59 @@
++ This is a sample for doas -su mylife.root story file.
++ This is a comment.
+
+[condition name="a" default=false]
+
+[file xxx.txt]
+[require]
+storyWhere >= 1
+[fileContent]
+This is a file
+/trig a
+/sw next
++ sw = storyWhere
+
+[trigger a]
+[when]
+called
+[do]
+- echo
+    This is a trigger (after a command)
+
+[manAI]
+[require]
+storyWhere >= 1
+[talkContent]
+(emotion) talk
+/sw next
+
+[webTry]
+[name]
+test
+[filepath]
+/1004.html
++ / = ./public/webtries
+
+[manAI]
+[require]
+storyWhere >= 2
+[talkContent]
+(._.) i am going to call a webtry
+/wt go test
+/cond set a be true
++ wt = webTry
+
+++
+one '+' is inline comment
+two '+' is multi line comment
+
+space is needed between plus and comment.
+all calls '/' need params, such as:
+/sw next, back
+/wt go <wt name>, exit
+/trig <trigger name>
+/cond set <condition name> be <true(>=1 int)/false(0 int)/string/int>
+
+as for now, only storyWhere and custom conditions can use under require.
+storyWhere is a keyword, it cannot be a custom condition.
+
+++

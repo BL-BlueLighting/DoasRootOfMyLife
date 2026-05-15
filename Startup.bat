@@ -1,23 +1,11 @@
 @echo off
-echo DoasRootOfMylife
-echo Hold down... We are launching...
+echo doas -su mylife.root
+echo :: Welcome user.
 
 rem check requirements
 if not exist "node_modules" (
     echo Installing requirements...
     npm install
-)
-
-rem check if node is installed
-if not defined NODE_PATH (
-    echo Node.js is not installed. Please install Node.js and try again.
-    exit /b
-)
-
-rem check if npm is installed
-if not defined npm (
-    echo npm is not installed. Please install npm and try again.
-    exit /b
 )
 
 rem check if package.json exists
@@ -26,8 +14,8 @@ if not exist "package.json" (
     exit /b
 )
 
-echo All requirements are met. Starting the application...
+echo :: Entering terminal...
 
-npm start
+npm start --silent
 
 echo Goodbye, the user!

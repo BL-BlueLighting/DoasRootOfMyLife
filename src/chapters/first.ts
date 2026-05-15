@@ -23,47 +23,29 @@ export function registerFirstChapter(engine: GameEngine): void {
 
   engine.persist();
 
-  // ---- ls ----
-  engine.newCommand('ls', [], function () {
-    if (engine.storyWhere >= 0) {
-      engine.echoContent('README.txt', true);
-    }
-    if (engine.storyWhere === 2) {
-      engine.echoContent('sudoerofmyself', true);
-    }
-    if (engine.storyWhere > 2 || engine.storyWhere === 201) {
-      engine.echoContent('sudoerofmyself', true);
-      engine.echoContent('sudoerofmyself.decrypt', true);
-    }
-    engine.persist();
-  });
+  // ---- Virtual files ----
+  engine.addFile('~/README.txt', (e) => {
+    if (e.storyWhere !== 0) return;
+    return [
+      'CHAPTER 1 - 探索空间',
+      '你放假了。你闲来无事，决定进 CLI 模式和 manAI 玩玩。',
+      '老朋友，就只过这么一段时间，你应该没有忘记怎么用 CLI 吧？',
+      'manAI 给你留下了一张纸条：',
+      '    人，如果你看到这张纸条，说明你重新进来了 CLI 模式。\n    如果你来了，就用 manAI 叫我。',
+    ].join('\n');
+  }, 0);
 
-  // ---- cat ----
-  engine.newCommand('cat', ['filename'], function (api: CommandAPI) {
-    const filename = api.args[0];
-    if (engine.storyWhere === 0 && filename === 'README.txt') {
-      engine.echoContent('CHAPTER 1 - 探索空间', true);
-      engine.echoContent('你放假了。你闲来无事，决定进 CLI 模式和 manAI 玩玩。', true);
-      engine.echoContent('老朋友，就只过这么一段时间，你应该没有忘记怎么用 CLI 吧？', true);
-      engine.echoContent('manAI 给你留下了一张纸条：', true);
-      engine.echoContent('    人，如果你看到这张纸条，说明你重新进来了 CLI 模式。\n    如果你来了，就用 manAI 叫我。', true);
-    }
-    if (engine.storyWhere === 2 && filename === 'sudoerofmyself') {
-      engine.storyWhere = 3;
-      engine.echoContent(
-        'Li4uIC4uLSAtLi4uIC4uLiAtLi0uIC4tLiAuLiAtLi4uIC4gLyAtLi4uIC4tLi4gLi0uLS4tIC0uLi4gLi0uLiAuLi0gLiAuLS4uIC4uIC0tLiAuLi4uIC0gLi4gLS4gLS0uIC8gLS4tLS4gLi4tIC4uIC0uLiAtLS0uLi4gLi0tLS0gLi4uLi4gLi4uLS0gLi4uLi0gLS0tLi4gLi4uLi4gLi4tLS0gLi4uLS0gLS0tLi4gLS0tLi4gLS4tLS4tIC8gLS0tIC0uIC8gLS4uLiAuLiAuLS4uIC4uIC0uLi4gLi4gLi0uLiAuLiAtLi0uLS0gLyAuLSAtLiAtLi4gLS0uLi0tIC8gLi0tIC4uLi4gLiAuLS4gLiAvIC4uIC4uLiAvIC0tIC0uLS0gLyAuLi0gLi4gLS4uIC4uLS0uLg==',
-        true,
-      );
-    }
-    if (engine.storyWhere === 201 && filename === 'sudoerofmyself.decrypt') {
-      engine.storyWhere = 3;
-      engine.echoContent(
-        '... ..- -... ... -.-. .-. .. -... . / -... .-.. .-.-.- -... .-.. ..- . .-.. .. --. .... - .. -. --. / -.--. ..- .. -.. ---... .---- ..... ...-- ....- ---.. ..... ..--- ...-- ---.. ---.. -.--.- / --- -. / -... .. .-.. .. -... .. .-.. .. -.-.-- / .- -. -.. --..-- / .-- .... . .-. . / .. ... / -- -.-- / ..- .. -.. ..--..',
-        true,
-      );
-    }
-    engine.persist();
-  });
+  engine.addFile('~/sudoerofmyself', (e) => {
+    if (e.storyWhere !== 2) return;
+    e.storyWhere = 3;
+    return 'Li4uIC4uLSAtLi4uIC4uLiAtLi0uIC4tLiAuLiAtLi4uIC4gLyAtLi4uIC4tLi4gLi0uLS4tIC0uLi4gLi0uLiAuLi0gLiAuLS4uIC4uIC0tLiAuLi4uIC0gLi4gLS4gLS0uIC8gLS4tLS4gLi4tIC4uIC0uLiAtLS0uLi4gLi0tLS0gLi4uLi4gLi4uLS0gLi4uLi0gLS0tLi4gLi4uLi4gLi4tLS0gLi4uLS0gLS0tLi4gLS0tLi4gLS4tLS4tIC8gLS0tIC0uIC8gLS4uLiAuLiAuLS4uIC4uIC0uLi4gLi4gLi0uLiAuLiAtLi0uLS0gLyAuLSAtLiAtLi4gLS0uLi0tIC8gLi0tIC4uLi4gLiAuLS4gLiAvIC4uIC4uLiAvIC0tIC0uLS0gLyAuLi0gLi4gLS4uIC4uLS0uLg==';
+  }, 2);
+
+  engine.addFile('~/sudoerofmyself.decrypt', (e) => {
+    if (e.storyWhere !== 201) return;
+    e.storyWhere = 3;
+    return '... ..- -... ... -.-. .-. .. -... . / -... .-.. .-.-.- -... .-.. ..- . .-.. .. --. .... - .. -. --. / -.--. ..- .. -.. ---... .---- ..... ...-- ....- ---.. ..... ..--- ...-- ---.. ---.. -.--.- / --- -. / -... .. .-.. .. -... .. .-.. .. -.-.-- / .- -. -.. --..-- / .-- .... . .-. . / .. ... / -- -.-- / ..- .. -.. ..--..';
+  }, 3);
 
   // ---- manAI ----
   engine.newCommand('manAI', [], function () {

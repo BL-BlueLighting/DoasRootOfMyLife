@@ -23,3 +23,8 @@ Thumbs.db
 # Logs
 *.log
 npm-debug.log*
+
+# Claude Code
+.claude
+.claude/*
+*.claude

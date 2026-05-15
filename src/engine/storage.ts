@@ -18,6 +18,12 @@ export interface SaveData {
   nextStory: boolean;
   accessGiven: boolean;
   sideBarEnabled: boolean;
+  currentDir: string;
+}
+
+export interface ProfileData {
+  username: string;
+  hostname: string;
 }
 
 export function loadState(chapterId: string): SaveData | null {
@@ -55,4 +61,22 @@ export function saveAchieves(gameId: string, achieves: string[]): void {
   ensureDir();
   const filePath = path.join(SAVE_DIR, `achieves-${gameId}.json`);
   fs.writeFileSync(filePath, JSON.stringify(achieves, null, 2), 'utf-8');
+}
+
+// Global user profile (shared across all chapters)
+export function loadProfile(): ProfileData | null {
+  ensureDir();
+  const filePath = path.join(SAVE_DIR, 'profile.json');
+  if (!fs.existsSync(filePath)) return null;
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+  } catch {
+    return null;
+  }
+}
+
+export function saveProfile(profile: ProfileData): void {
+  ensureDir();
+  const filePath = path.join(SAVE_DIR, 'profile.json');
+  fs.writeFileSync(filePath, JSON.stringify(profile, null, 2), 'utf-8');
 }

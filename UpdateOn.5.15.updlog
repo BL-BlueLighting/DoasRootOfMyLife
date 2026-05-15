@@ -1,0 +1,21 @@
+这些是我们在 5.15 日所更新的内容。
+
+1. Finished webTry and capturer, panel.
+   完成了 webTry, capturer 和 panel 的开发。
+
+   webTry 是通过模拟沙箱进行训练的 html 文件，将部署在由 `webserver.ts` 提供的 Node.js 网页服务器中。
+   capturer 是一个不通过 webTry 的文件，其用于抓包网络请求，与 webTry 同样部署在 `webserver.ts` 提供的 Node.js 网页服务器中。
+   panel 为 Ink 界面侧栏，用于显示指导。
+
+2. Added profile initialization and boot screen.
+   添加了 profile 初始化和开机画面。
+
+   在 `App.tsx` 中添加了 profile 初始化流程，用户首次运行时会被引导完成 profile 初始化，包括输入用户名等信息。初始化完成后会显示一个开机画面，展示一些提示信息。
+
+3. Introduce the New Story file format ---- '.doasStory!'
+   引入新的故事文件格式 ---- '.doasStory!'
+
+   我们将每个章节的故事部分与代码部分进行剥离，让故事部分更加纯粹。
+   使用 '.doasStory' 作为故事文件格式，里面只包含故事文本和一些元信息，不再包含代码。
+   代码将单独放在 '*.ts' 文件中，故事文件通过元信息关联到对应的代码文件。
+   语法请查看根目录下的 'example.doasStory' 文件。

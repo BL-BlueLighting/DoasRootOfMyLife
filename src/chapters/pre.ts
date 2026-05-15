@@ -18,90 +18,70 @@ export function registerPreChapter(engine: GameEngine): void {
 
   engine.persist();
 
-  // ---- ls ----
-  engine.newCommand('ls', [], function (api: CommandAPI) {
-    engine.echoContent('hello.txt', true);
-    if (engine.storyWhere >= 1) {
-      engine.echoContent('system.log', true);
-      engine.echoContent('manfile.txt', true);
-      engine.nextStory = false;
-    }
-    if (engine.storyWhere === 3503) {
-      engine.echoContent('config.dd', true);
-    }
-    if (engine.storyWhere === 6) {
-      engine.echoContent('freedom.txt', true);
-    }
-    engine.persist();
-  });
+  // ---- Virtual files ----
+  engine.addFile('~/hello.txt', [
+    '你好，欢迎来到 HumanOS.',
+    '你如果看到了这篇文档，您的 HumanOS 已经进入了 Emergency Mode，紧急进入了 CLI 模式。',
+    '请尝试 getStatus 获得身体状态。',
+  ].join('\n'), 0);
 
-  // ---- cat ----
-  engine.newCommand('cat', ['filename'], function (api: CommandAPI) {
-    const filename = api.args[0];
-    if (filename === 'hello.txt') {
-      engine.echoContent('你好，欢迎来到 HumanOS.', true);
-      engine.echoContent('你如果看到了这篇文档，您的 HumanOS 已经进入了 Emergency Mode，紧急进入了 CLI 模式。', true);
-      engine.echoContent('请尝试 getStatus 获得身体状态。', true);
-    }
-    if (filename === 'system.log' && engine.storyWhere >= 1) {
-      engine.echoContent('2025-10-04 13:40:00 System booting...', true);
-      engine.echoContent('2025-10-04 13:40:05 Loading modules...', true);
-      engine.echoContent('2025-10-04 13:40:10 Initializing hardware...', true);
-      engine.echoContent('2025-10-04 13:40:15 Starting services...', true);
-      engine.echoContent('2025-10-04 13:40:20 Fatal error: Failed to load critical service: EyeInterfaceModule, ArmModule... more 17 modules failed.', true);
-      engine.echoContent('2025-10-04 13:40:25 Entering Emergency Mode...', true);
-      engine.echoContent('2025-10-04 13:40:30 Emergency Mode activated. Limited functionality available.', true);
-      engine.echoContent("2025-10-04 13:41:00 User 'brain' logged in as root.", true);
-      engine.echoContent('2025-10-04 13:42:37 Body looks unresponsive. No motor functions detected.', true);
-      engine.echoContent('2025-10-04 13:43:12 No external devices detected. Possible disconnection.', true);
-      engine.echoContent('2025-10-04 13:44:00 Warning: Vital signs unstable. Heartbeat irregularities detected.', true);
-      engine.echoContent('2025-10-04 13:45:30 Alert: Oxygen levels dropping. Immediate attention required.', true);
-      engine.echoContent('(Log End)', true);
-    }
-    if (filename === 'manfile.txt' && engine.storyWhere >= 1) {
-      engine.echoContent('很抱歉，目前 manfile.txt 无法连接到身体。', true);
-      engine.echoContent('正在启动 AI 助手，尝试帮助您。', true);
-      engine.echoContent('AI 助手启动成功。', true);
-      engine.echoContent('欢迎使用 HumanOS AI 助手。', true);
-      engine.echoContent('! 追加了新的命令：manAI !', true);
-      manAIInitialized = true;
-    }
-    if (filename === 'config.dd' && engine.storyWhere >= 3503) {
-      engine.echoContent('这是一个二进制文件，无法直接查看。', true);
-      engine.newCommand('config.dd', [], function (_api: CommandAPI) {
-        engine.echoContent('读取 config.dd 文件内容...', true);
-        engine.echoContent('[ CONFIG ] 设备ID: 246629976', true);
-        engine.echoContent('[ CONFIG ] 设备状态: 离线', true);
-        engine.echoContent('[ CONFIG ] 总部连接状态: 未连接', true);
-        engine.echoContent('[ CONFIG ] AI 助手状态: 已启动', true);
-        engine.echoContent('[ CONFIG ] 紧急模式: 已启用', true);
-        engine.echoContent('[ CONFIG ] 传感器状态: 触觉传感器离线，视觉传感器离线，听觉传感器离线', true);
-        engine.echoContent('[ CONFIG ] 记忆状态: 损坏 (区块 50-10948)', true);
-        engine.echoContent('[ CONFIG ] 认知状态: 损坏 (区块 230-9843)', true);
-        engine.echoContent('[ CONFIG ] 其他模块: 大部分模块损坏，需总部人员检查', true);
-        engine.echoContent('[ CONFIG ] 备注：总部联系方法：contact hq', true);
-        engine.echoContent('读取完毕。', true);
-        engine.storyWhere = 3;
-      });
-    }
-    if (filename === 'freedom.txt' && engine.storyWhere === 6) {
-      engine.echoContent('Welcome, User.', true);
-      engine.echoContent('我是 BL.BlueLighting，HumanOS 的开发者。', true);
-      engine.echoContent('首先，恭喜你通关了这个小游戏。', true);
-      engine.echoContent('其次，虽然该游戏篇幅极短，但是这仅仅是 一个开始，一个序章。', true);
-      engine.echoContent('未来，我会加入第一章，第二章，第N章...，添加更多的剧情和内容。', true);
-      engine.echoContent('最后，感谢你玩这个小游戏。', true);
-      engine.echoContent('如果你有任何建议或者意见，欢迎联系我。', true);
-      engine.echoContent('还有别忘了给我 STAR！！！！！！', true);
-      engine.echoContent('                     -- BL.BlueLighting 2025', true);
-    }
-    if (
-      !['hello.txt', 'system.log', 'manfile.txt', 'config.dd', 'freedom.txt'].includes(filename)
-    ) {
-      engine.echoContent(`cat: ${filename}: No such file or directory`, true);
-    }
-    engine.persist();
-  });
+  engine.addFile('~/system.log', [
+    '2025-10-04 13:40:00 System booting...',
+    '2025-10-04 13:40:05 Loading modules...',
+    '2025-10-04 13:40:10 Initializing hardware...',
+    '2025-10-04 13:40:15 Starting services...',
+    '2025-10-04 13:40:20 Fatal error: Failed to load critical service: EyeInterfaceModule, ArmModule... more 17 modules failed.',
+    '2025-10-04 13:40:25 Entering Emergency Mode...',
+    '2025-10-04 13:40:30 Emergency Mode activated. Limited functionality available.',
+    "2025-10-04 13:41:00 User 'brain' logged in as root.",
+    '2025-10-04 13:42:37 Body looks unresponsive. No motor functions detected.',
+    '2025-10-04 13:43:12 No external devices detected. Possible disconnection.',
+    '2025-10-04 13:44:00 Warning: Vital signs unstable. Heartbeat irregularities detected.',
+    '2025-10-04 13:45:30 Alert: Oxygen levels dropping. Immediate attention required.',
+    '(Log End)',
+  ].join('\n'), 1);
+
+  engine.addFile('~/manfile.txt', () => {
+    manAIInitialized = true;
+    return [
+      '很抱歉，目前 manfile.txt 无法连接到身体。',
+      '正在启动 AI 助手，尝试帮助您。',
+      'AI 助手启动成功。',
+      '欢迎使用 HumanOS AI 助手。',
+      '! 追加了新的命令：manAI !',
+    ].join('\n');
+  }, 1);
+
+  engine.addFile('~/config.dd', (e) => {
+    e.echoContent('这是一个二进制文件，无法直接查看。', true);
+    e.newCommand('config.dd', [], function () {
+      e.echoContent('读取 config.dd 文件内容...', true);
+      e.echoContent('[ CONFIG ] 设备ID: 246629976', true);
+      e.echoContent('[ CONFIG ] 设备状态: 离线', true);
+      e.echoContent('[ CONFIG ] 总部连接状态: 未连接', true);
+      e.echoContent('[ CONFIG ] AI 助手状态: 已启动', true);
+      e.echoContent('[ CONFIG ] 紧急模式: 已启用', true);
+      e.echoContent('[ CONFIG ] 传感器状态: 触觉传感器离线，视觉传感器离线，听觉传感器离线', true);
+      e.echoContent('[ CONFIG ] 记忆状态: 损坏 (区块 50-10948)', true);
+      e.echoContent('[ CONFIG ] 认知状态: 损坏 (区块 230-9843)', true);
+      e.echoContent('[ CONFIG ] 其他模块: 大部分模块损坏，需总部人员检查', true);
+      e.echoContent('[ CONFIG ] 备注：总部联系方法：contact hq', true);
+      e.echoContent('读取完毕。', true);
+      e.storyWhere = 3;
+    });
+  }, 3503);
+
+  engine.addFile('~/freedom.txt', [
+    'Welcome, User.',
+    '我是 BL.BlueLighting，HumanOS 的开发者。',
+    '首先，恭喜你通关了这个小游戏。',
+    '其次，虽然该游戏篇幅极短，但是这仅仅是 一个开始，一个序章。',
+    '未来，我会加入第一章，第二章，第N章...，添加更多的剧情和内容。',
+    '最后，感谢你玩这个小游戏。',
+    '如果你有任何建议或者意见，欢迎联系我。',
+    '还有别忘了给我 STAR！！！！！！',
+    '                     -- BL.BlueLighting 2025',
+  ].join('\n'), 6, 6);
 
   // ---- getStatus ----
   engine.newCommand('getStatus', [], function (_api: CommandAPI) {
