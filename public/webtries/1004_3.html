@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN">
+    <head>
+        <title>Perfect Contact System</title>
+    </head>
+    <body style="background-color: white;">
+        <main style="margin-top: 27px; margin-left: 27px;">
+            <h1>完美通讯系统</h1>
+            <h2>- LOGIN SYSTEM -</h2>
+            <div class="login_form">
+                <label for="username">用户名:</label><br/>
+                <input type="text" id="username" name="username" required/><br/><br/>
+                <label for="password">密码:</label><br/>
+                <input type="password" id="password" name="password" required/><br/><br/>
+                <input type="button" id="login" value="登录"/>
+            </div>
+        </main>
+    </body>
+
+    <script>
+        const API_BASE = window.location.origin + '/api';
+        document.getElementById("login").addEventListener("click", function() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            const more = [
+                '------ BEGIN PACKET ------',
+                'Method: Post',
+                'Request-URI: /api/v1/login',
+                'Host: 173.5.5.3:80',
+                'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'Content-Type: application/x-www-form-urlencoded',
+                'Content-Length: ' + (('username='.length + username.length + '&password='.length + password.length)),
+                '',
+                'Request-Source: username=' + username + '&password=' + password,
+                'Request-Raw:',
+                '  {',
+                "    'Username': '" + username + "',",
+                "    'Password': '" + password + "'",
+                '  }',
+                '------ END PACKET ------'
+            ].join('\n');
+
+            fetch(API_BASE + '/capturer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    ip: '127.0.0.1',
+                    sender: 'Chromium',
+                    more: more
+                })
+            }).then(() => {
+                return fetch(API_BASE + '/contact', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key: 'drom-contact-locals-2', value: 'true' })
+                });
+            }).catch(() => {});
+        });
+    </script>
+</html>

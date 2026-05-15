@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>HumanOS - Capturer</title>
+<style>
+  :root{
+    --bg:#000;
+    --panel:#071010;
+    --accent:#00ff88;
+    --muted:#67ffb0;
+    --card-bg: rgba(0,0,0,0.6);
+  }
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--accent);font-family:ui-monospace,Consolas,monospace;}
+  .wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;}
+  .card{
+    width:980px;max-width:calc(100% - 40px);background:linear-gradient(180deg,#040404 0%, #071010 100%);border:1px solid rgba(0,255,136,0.08);
+    box-shadow: 0 8px 40px rgba(0,255,136,0.04);border-radius:8px;padding:18px;display:flex;gap:14px;
+  }
+  .left{flex:1;display:flex;flex-direction:column;gap:12px;}
+  .right{width:320px;min-width:260px;display:flex;flex-direction:column;gap:12px;}
+  .section{background:var(--card-bg);border:1px solid rgba(0,255,136,0.06);padding:12px;border-radius:6px;}
+  .section h2{margin:0 0 8px 0;color:var(--muted);font-size:14px;}
+  .kv{font-size:13px;line-height:1.6;color:var(--accent);display:flex;gap:8px;align-items:center;}
+  .kv .k{color:rgba(255,255,255,0.25);min-width:88px;}
+  .kv .v{flex:1;color:var(--accent);word-break:break-all;}
+  .controls{display:flex;gap:8px;margin-top:8px;}
+  .btn{background:transparent;border:1px solid rgba(0,255,136,0.12);color:var(--accent);padding:6px 10px;border-radius:6px;cursor:pointer}
+  .btn:active{transform:translateY(1px)}
+  textarea#moreArea{width:94%;height:260px;background:#030403;color:var(--accent);border:1px solid rgba(0,255,136,0.06);padding:10px;border-radius:6px;resize:vertical;font-family:ui-monospace,Consolas,monospace;font-size:13px;}
+  .muted{color:rgba(255,255,255,0.24);font-size:12px;}
+  .small{font-size:12px;padding:6px 8px}
+  .row{display:flex;gap:8px;align-items:center}
+  @media(max-width:900px){
+    .card{flex-direction:column;}
+    .right{width:100%}
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card" role="main" aria-label="DSMR Capturer UI">
+      <h3>Capturer - CAPTURED!</h3>
+      <br/>
+      <div class="left">
+        <div class="section" id="infoSection">
+          <h2>Information - 信息</h2>
+          <div class="kv"><div class="k">IP:</div><div class="v" id="info_ip">--</div></div>
+          <div class="kv"><div class="k">Sender:</div><div class="v" id="info_sender">--</div></div>
+          <div class="controls">
+            <div style="flex:1"></div>
+            <span class="muted" id="timeStamp"></span>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>More - 更多</h2>
+          <textarea id="moreArea" placeholder="" readonly></textarea>
+          <div class="row" style="justify-content:space-between;margin-top:8px">
+            <span class="muted" id="apiStatus"></span>
+            <button class="btn small" id="btnRefresh">刷新</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ===== 参数读取 ===== */
+const params = new URLSearchParams(window.location.search);
+const param_ip = params.get('ip') || '0.0.0.0';
+const param_sender = params.get('sender') || 'Chromium';
+const API_BASE = window.location.origin + '/api/capturer';
+
+/* ===== 元素引用 ===== */
+const el_ip = document.getElementById('info_ip');
+const el_sender = document.getElementById('info_sender');
+const el_more = document.getElementById('moreArea');
+const el_time = document.getElementById('timeStamp');
+const el_status = document.getElementById('apiStatus');
+
+/* ===== 通过 HTTP API 加载 "more" 数据 ===== */
+async function loadMoreFromAPI(){
+  try {
+    const res = await fetch(API_BASE);
+    const data = await res.json();
+    el_more.value = data.more || '';
+    if (data.ip) el_ip.textContent = data.ip;
+    if (data.sender) el_sender.textContent = data.sender;
+    el_status.textContent = '✓ 已同步';
+  } catch(e) {
+    el_status.textContent = '✗ 无法连接服务器';
+  }
+}
+
+/* ===== 初始化显示 ===== */
+function renderInfo(){
+  el_ip.textContent = param_ip;
+  el_sender.textContent = param_sender;
+  el_time.textContent = new Date().toLocaleString();
+}
+
+/* 页面初始化 */
+renderInfo();
+loadMoreFromAPI();
+
+/* 每 2 秒轮询一次，同步 CLI 端数据 */
+setInterval(loadMoreFromAPI, 2000);
+
+/* 刷新按钮 */
+document.getElementById('btnRefresh').addEventListener('click', loadMoreFromAPI);
+</script>
+</body>
+</html>

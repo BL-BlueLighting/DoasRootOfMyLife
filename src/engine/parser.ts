@@ -1,9 +1,13 @@
 // doas -su mylife.root - Rich Text Parser
 // Converts [color], [progress], [runCommand] markup to structured objects
 
-export interface OutputLine {
+export interface OutputSegment {
   text: string;
   color?: string;
+}
+
+export interface OutputLine {
+  segments: OutputSegment[];
 }
 
 export interface OutputBlock {
@@ -83,28 +87,53 @@ export function parseEchoContent(content: string): OutputBlock[] {
   return blocks;
 }
 
-// Simplified: split blocks into individual lines for display
+// Flatten blocks into OutputLines, merging consecutive text segments on the same line
 export function blocksToLines(blocks: OutputBlock[]): OutputLine[] {
   const lines: OutputLine[] = [];
+  let currentLine: OutputLine | null = null;
+
+  function flushLine() {
+    if (currentLine && currentLine.segments.length > 0) {
+      lines.push(currentLine);
+      currentLine = null;
+    }
+  }
 
   for (const block of blocks) {
-    if (block.type === 'text' && block.text) {
-      const splitLines = block.text.split('\n');
-      for (const line of splitLines) {
-        lines.push({ text: line, color: block.color });
+    if (block.type === 'text' && block.text !== undefined) {
+      const splitText = block.text.split('\n');
+      for (let i = 0; i < splitText.length; i++) {
+        const segText = splitText[i];
+        if (i > 0) {
+          // \n found — flush current line and start a new one
+          flushLine();
+        }
+        if (!currentLine) {
+          currentLine = { segments: [] };
+        }
+        if (segText.length > 0) {
+          currentLine.segments.push({ text: segText, color: block.color });
+        }
       }
     } else if (block.type === 'progress') {
+      flushLine();
       lines.push({
-        text: `[PROGRESS max=${block.max} timeAdd=${block.timeAdd}]`,
-        color: '#4caf50',
+        segments: [{
+          text: `[PROGRESS max=${block.max} timeAdd=${block.timeAdd}]`,
+          color: '#4caf50',
+        }],
       });
     } else if (block.type === 'runCommand') {
+      flushLine();
       lines.push({
-        text: `Try: ${block.command} (${block.args})`,
-        color: '#00ff66',
+        segments: [{
+          text: `Try: ${block.command} (${block.args})`,
+          color: '#00ff66',
+        }],
       });
     }
   }
+  flushLine();
 
   return lines;
 }

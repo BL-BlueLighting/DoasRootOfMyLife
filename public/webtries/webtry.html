@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-CN">
+    <head>
+        <title>Hydra Shell - Web Try</title>
+    </head>
+    <body style="background-color: black;">
+        <div class="container" style="width: 100%; height: 100vh;">
+            <center><p style="color: white;">HYDRA SHELL - WEB TRY - RUNNING</p></center>
+            <br/>
+            <iframe style="width: 100%; height: 90%; border: 1px solid white; border-radius: 10px;"></iframe>
+        </div>
+        
+    </body>
+
+    <script>
+        // 获取访问页面的链接
+        const params = new URLSearchParams(window.location.search);
+        const pageid = params.get('pageid');
+
+        // 设置iframe的src
+        document.querySelector('iframe').src = "./" + pageid + ".html";
+    </script>
+</html>

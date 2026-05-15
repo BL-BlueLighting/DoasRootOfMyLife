@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Box, Text, useInput, useApp } from 'ink';
-import { GameEngine, GameState } from '../engine/engine.js';
-import { OutputLine, OutputBlock } from '../engine/parser.js';
+import { GameEngine, GameState, PanelStatus } from '../engine/engine.js';
+import { OutputLine, OutputBlock, OutputSegment } from '../engine/parser.js';
 
 interface AppProps {
   engine: GameEngine;
@@ -18,6 +18,9 @@ export function App({ engine, bootText, onBootComplete }: AppProps) {
   const [showBoot, setShowBoot] = useState(true);
   const [bootLines, setBootLines] = useState<string[]>([]);
   const [bootDone, setBootDone] = useState(false);
+  const [panel, setPanel] = useState<PanelStatus>({
+    visible: false, ip: '127.0.0.1', ports: '22', mem: '739MiB', extra: '',
+  });
   const history = useRef<string[]>([]);
   const askCb = useRef<((s: string) => void) | null>(null);
 
@@ -45,17 +48,23 @@ export function App({ engine, bootText, onBootComplete }: AppProps) {
   useEffect(() => {
     engine.setCallbacks(
       (line: OutputLine) => {
-        setLines(prev => [...prev, line]); // write to screen
+        setLines(prev => [...prev, line]);
       },
       (_prompt: string, cb: (response: string) => void) => {
         askCb.current = cb;
         setLocked(false);
       },
       (l: boolean) => {
-        setLocked(l); // lock the input
+        setLocked(l);
       },
       () => {
-        setLines([]); // it's f***king clean the lines, i didn't remember this code is how time i or ds wrotes
+        setLines([]);
+      },
+      () => {
+        exit();
+      },
+      (status: PanelStatus) => {
+        setPanel({ ...status });
       },
     );
   }, [engine]);
@@ -140,38 +149,61 @@ export function App({ engine, bootText, onBootComplete }: AppProps) {
   }
 
   return (
-    <Box flexDirection="column" padding={0}>
-      {/* Header */}
-      <Box borderStyle="single" borderColor="#87ceeb" paddingX={1} justifyContent="center">
-        <Text bold>
-          <Text color="#00ff66">doas</Text>
-          <Text color="#888888"> -su </Text>
-          <Text color="#87ceeb">mylife.root</Text>
-          <Text color="#00ff66"> - HumanOS Terminal</Text>
-        </Text>
+    <Box flexDirection="row" padding={0}>
+      {/* Main terminal area */}
+      <Box flexDirection="column" flexGrow={1} padding={0}>
+        {/* Header */}
+        <Box borderStyle="single" borderColor="#87ceeb" paddingX={1} justifyContent="center">
+          <Text bold>
+            <Text color="#00ff66">doas</Text>
+            <Text color="#888888"> -su </Text>
+            <Text color="#87ceeb">mylife.root</Text>
+            <Text color="#00ff66"> - HumanOS Terminal</Text>
+          </Text>
+        </Box>
+
+        {/* Output area */}
+        <Box flexDirection="column" height={maxVisible + 2} overflow="hidden">
+          {visibleLines.map((line, i) => (
+            <Text key={i}>
+              {line.segments.map((seg, j) => (
+                <Text key={j} color={seg.color || '#888888'}>{seg.text}</Text>
+              ))}
+            </Text>
+          ))}
+        </Box>
+
+        {/* Input line */}
+        <Box flexDirection="row">
+          <Text color="#00ff66">yourself@humanos, ~, $ </Text>
+          {locked ? (
+            <Text color="#888">== Performing uninterruptable tasks. ==</Text>
+          ) : (
+            <Text color="#ffffffff">
+              {input}
+              <Text color="#555555ff">█</Text>
+            </Text>
+          )}
+        </Box>
       </Box>
 
-      {/* Output area */}
-      <Box flexDirection="column" height={maxVisible + 2} overflow="hidden">
-        {visibleLines.map((line, i) => (
-          <Text key={i} color={line.color || '#888888'}>
-            {line.text}
-          </Text>
-        ))}
-      </Box>
-
-      {/* Input line */}
-      <Box flexDirection="row">
-        <Text color="#00ff66">yourself@humanos, ~, $ </Text>
-        {locked ? (
-          <Text color="#888">== Performing uninterruptable tasks. ==</Text>
-        ) : (
-          <Text color="#ffffffff">
-            {input}
-            <Text color="#555555ff">█</Text>
-          </Text>
-        )}
-      </Box>
+      {/* Side panel */}
+      {panel.visible && (
+        <Box
+          flexDirection="column"
+          width={30}
+          borderStyle="single"
+          borderColor="#87ceeb"
+          paddingX={1}
+        >
+          <Text bold color="#00ff66">[ PANEL ]</Text>
+          <Text color="#888888">──────────────</Text>
+          <Text color="#87ceeb">IP: <Text color="#ffffff">{panel.ip}</Text></Text>
+          <Text color="#87ceeb">Ports: <Text color="#ffffff">{panel.ports}</Text></Text>
+          <Text color="#87ceeb">Mem: <Text color="#ffffff">{panel.mem}</Text></Text>
+          {panel.extra ? <Text color="#888888">{panel.extra}</Text> : null}
+        </Box>
+      )}
     </Box>
   );
 }

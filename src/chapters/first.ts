@@ -367,7 +367,6 @@ export function registerFirstChapter(engine: GameEngine): void {
           engine.echoContent('Hold on, fetching admin page...', true);
           engine.loadWebTry('1004_1');
           engine.updateHelp('现在登录管理后台。');
-          engine.echoContent('[ INFO ] WebTry 功能在 CLI 模式下不可用。请手动模拟。', true);
           engine.updateHelp('恭喜🎉 登录成功。实战中不会明文存密码的，所以你不会这么容易就进来。<br/>接下来，你可以尝试 SQL Inject 了。');
           engine.echoContent('! 接下来，重新回到 webtry 界面，跟着我学习。 !', true);
           engine.storyWhere = 1008;
@@ -380,7 +379,7 @@ export function registerFirstChapter(engine: GameEngine): void {
           engine.echoContent('Hold on, fetching admin...', true);
           engine.loadWebTry('1004_4');
           engine.updateHelp('尝试在用户名和密码处注入 SQL 语句，比如 " \' OR 1=1 "。');
-          engine.echoContent('[ INFO ] 在 CLI 模式下，请自行理解 SQL 注入概念。', true);
+          engine.echoContent('[ INFO ] 请在浏览器打开的 WebTry 页面中尝试 SQL 注入。', true);
           engine.updateHelp('恭喜你，成功 SQL Inject 了！<br/>现在，你已经掌握了基本的注入方法，接下来可以尝试更多的注入方式了。<br/>-- 第二章 拉开序幕 --');
           engine.storyWhere = 1010;
         }
@@ -415,7 +414,8 @@ export function registerFirstChapter(engine: GameEngine): void {
       if (engine.storyWhere === 1008) {
         engine.updateHelp('很好！接下来，随便乱填登录信息，然后登录看看。');
         engine.echoContent('! 现在你可以尝试登录了。 !', true);
-        engine.echoContent('[ INFO ] Capturer 在 CLI 模式下不可用。模拟捕获结果...', true);
+        engine.echoContent('正在启动 NetworkCapturer...', true);
+        engine.loadCapturer('173.5.5.3', 'Chromium', '等待抓包数据...');
         engine.updateHelp(
           '你看到了抓包信息吗？抓包信息里有用户名和密码。<br/>你可以发现，这里没有进行任何处理，直接请求，我们便可以利用这东西来注入。<br/>现在，关掉 webtry 页面和 capture 页面，重新 webtry。',
         );

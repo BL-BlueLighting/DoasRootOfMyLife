@@ -15,6 +15,7 @@
   "pkg": {
     "assets": [
       "dist/**/*.js",
+      "public/**/*",
       "node_modules/**/*"
     ]
   },

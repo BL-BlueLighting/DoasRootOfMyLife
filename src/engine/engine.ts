@@ -3,6 +3,7 @@
 
 import { parseEchoContent, blocksToLines, OutputLine, OutputBlock } from './parser.js';
 import { loadState, saveState, loadAchieves, saveAchieves, SaveData } from './storage.js';
+import { webServer } from './webserver.js';
 
 export interface CommandAPI {
   args: string[];
@@ -35,11 +36,21 @@ export interface GameState {
   achieves: string[];
 }
 
+export interface PanelStatus {
+  visible: boolean;
+  ip: string;
+  ports: string;
+  mem: string;
+  extra: string;
+}
+
 type WriteLineFn = (line: OutputLine) => void;
 type WriteBlockFn = (block: OutputBlock) => void;
 type AskFn = (prompt: string, callback: (response: string) => void) => void;
 type LockInputFn = (locked: boolean) => void;
+type ExitProgramFn = () => void;
 type ClearOutputFn = () => void;
+type PanelUpdateFn = (status: PanelStatus) => void;
 
 export class GameEngine {
   private commands = new Map<string, CommandEntry>();
@@ -55,8 +66,19 @@ export class GameEngine {
   private onAsk: AskFn = () => {};
   private onLock: LockInputFn = () => {};
   private onClear: ClearOutputFn = () => {};
+  private onExit: ExitProgramFn = () => {};
+  private onPanel: PanelUpdateFn = () => {};
   private callbacksSet = false;
   private pendingLines: OutputLine[] = [];
+
+  // Panel status
+  private panelStatus: PanelStatus = {
+    visible: false,
+    ip: '127.0.0.1',
+    ports: '22',
+    mem: '739MiB',
+    extra: '',
+  };
 
   constructor(chapterId: string, gameId: string) {
     this.chapterId = chapterId;
@@ -73,11 +95,20 @@ export class GameEngine {
   }
 
   // Wire up UI callbacks
-  setCallbacks(write: WriteLineFn, ask: AskFn, lock: LockInputFn, clear: ClearOutputFn): void {
+  setCallbacks(
+    write: WriteLineFn,
+    ask: AskFn,
+    lock: LockInputFn,
+    clear: ClearOutputFn,
+    exit: ExitProgramFn,
+    panel?: PanelUpdateFn,
+  ): void {
     this.onWrite = write;
     this.onAsk = ask;
     this.onLock = lock;
     this.onClear = clear;
+    this.onExit = exit;
+    if (panel) this.onPanel = panel;
     this.callbacksSet = true;
     // Flush pending output
     for (const line of this.pendingLines) {
@@ -208,7 +239,7 @@ export class GameEngine {
     if (!rawLine.trim()) return;
 
     // Echo the command
-    this.writeLine({ text: `$ ${rawLine}` });
+    this.writeLine({ segments: [{ text: `$ ${rawLine}` }] });
     this.state.history.push(rawLine);
 
     const tokens = this.tokenize(rawLine);
@@ -216,13 +247,13 @@ export class GameEngine {
     const entry = this.commands.get(cmd);
 
     if (!entry) {
-      this.writeLine({ text: `Command not found: ${cmd}` });
+      this.writeLine({ segments: [{ text: `Command not found: ${cmd}` }] });
       this.persist();
       return;
     }
 
     if (entry.storyWhereNeed > this.state.storyWhere) {
-      this.writeLine({ text: `Command not found: ${cmd}` });
+      this.writeLine({ segments: [{ text: `Command not found: ${cmd}` }] });
       this.persist();
       return;
     }
@@ -248,7 +279,7 @@ export class GameEngine {
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
-      this.writeLine({ text: `命令执行出错: ${msg}` });
+      this.writeLine({ segments: [{ text: `命令执行出错: ${msg}` }] });
     }
 
     this.persist();
@@ -292,17 +323,34 @@ export class GameEngine {
     this.onClear();
   }
 
-  // ---- Stubs for web-only features ----
-  loadWebTry(_pageId: string): void {
-    this.echoContent('[ INFO ] WebTry 功能在 CLI 模式下不可用。');
+  // ---- WebTry: open browser to local page ----
+  async loadWebTry(pageId: string): Promise<void> {
+    try {
+      await webServer.start();
+      this.echoContent(`[ WEBTRY ] 正在打开浏览器: ${webServer.url}/webtry.html?pageid=${pageId}`, true);
+      webServer.openBrowser(`/webtry.html?pageid=${pageId}`);
+    } catch (err) {
+      this.echoContent(`[ ERROR ] 无法启动 WebTry 服务: ${err}`, true);
+    }
   }
 
-  loadCapturer(_ip: string, _sender: string, _more: string): void {
-    this.echoContent('[ INFO ] Capturer 功能在 CLI 模式下不可用。');
+  // ---- Capturer: open browser to capturer page ----
+  async loadCapturer(ip: string, sender: string, more: string): Promise<void> {
+    try {
+      await webServer.start();
+      webServer.setCapturerData(ip, sender, more);
+      const encodedMore = encodeURIComponent(more);
+      this.echoContent(`[ CAPTURER ] 正在打开抓包器: ${webServer.url}/capturer.html?ip=${ip}&sender=${encodeURIComponent(sender)}`, true);
+      webServer.openBrowser(`/capturer.html?ip=${encodeURIComponent(ip)}&sender=${encodeURIComponent(sender)}&more=${encodedMore}`);
+    } catch (err) {
+      this.echoContent(`[ ERROR ] 无法启动 Capturer 服务: ${err}`, true);
+    }
   }
 
+  // ---- Panel (sidebar in Ink) ----
   showPanel(): void {
-    // Sidebar not available in CLI
+    this.panelStatus.visible = !this.panelStatus.visible;
+    this.onPanel({ ...this.panelStatus });
   }
 
   updateStatus(
@@ -312,6 +360,11 @@ export class GameEngine {
     cucontent = '',
     _extra = '',
   ): void {
+    this.panelStatus.ip = ip;
+    this.panelStatus.ports = ports;
+    this.panelStatus.mem = mem;
+    this.panelStatus.extra = cucontent;
+    this.onPanel({ ...this.panelStatus });
     this.echoContent(`[ STATUS ] IP: ${ip}  Ports: ${ports}  Mem: ${mem}  ${cucontent}`);
   }
 
@@ -332,5 +385,9 @@ export class GameEngine {
 
   static base64Decode(str: string): string {
     return Buffer.from(str, 'base64').toString('utf-8');
+  }
+
+  _goExit(): void {
+    this.onExit();
   }
 }
