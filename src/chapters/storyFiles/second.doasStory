@@ -1,0 +1,92 @@
++ ============================================================
++ Chapter: Second (第二章 - 核心损坏: manAI)
++ ============================================================
+
+[chapter]
+[id] second
+[name] 第二章 - 核心损坏: manAI
+[description]
+manAI 核心损坏，你需要学会独自修复它。
+[/description]
+[gameId] 2
+[/chapter]
+
+[useScript path="./second.ts"]
+
++ ============================== DIRECTORIES ==============================
+
+[dir path="/manAI"]
+[dir path="/log"]
+[restricted path="/var"]
+[restricted path="/home"]
+
++ ============================== FILES ==============================
+
+[file path="/manAI/manAIcore.model"]
+[require]
+storyWhere >= 1
+[fileContent]
++ Binary model file — use checkdata to inspect.
+[/file]
+
+[file path="/manAI/manAIdata.db"]
+[require]
+storyWhere >= 1
+[fileContent]
+This file size is too big (bigger than 315TiB, your memory 256TiB, unreadable).
+You can't show it in CLI.
+/cmd add sqlitecli
+[/file]
+
+[command name="sqlitecli"]
+[params]
+filepath dowhat dop1 dop2
+[run]
+[at when="$1 == 'manAImemory.db'"]
+- echo
+    The fixing process failed.
+    We are sorry. The data has been recovery to corrupted time.
+[/at]
+[/run]
+[/command]
+
+[file path="/manAI/manAImemory.db"]
+[require]
+storyWhere >= 1
+[fileContent]
+Sorry, this file is a database file.
+You can't show it in CLI directly.
+Please use any tools check it.
+/achieve 不是哥们怎么做到db文件都炸了的 Easy
+[/file]
+
+[file path="/log/tcbk-manAI-2025-12-09-12h-24m-56s.log"]
+[require]
+storyWhere >= 1
+[fileContent]
+Traceback, HumanOS component, manAI.
+Date: 2025.12.09, 12:24:56
+Why?
+    - Database, Model, Memory files broken.
+Then?
+    - manAI service can't run by its self.
+How to Recovery?
+    - Download new Model and try init new databases.
+    - Use data recovering applications.
+Where to download?
+    - Check the Releases of HumanOS, that's a model here.
+[/file]
+
++ ============================== manAI (CORRUPTED) ==============================
+
+[manAI]
+[require]
+storyWhere >= 0
+[talk]
+[at value="default"]
+- echo
+    [ ERROR ] Failed to call manAI server.
+    [ ERROR ] It seems like the manAI core was corrupted.
+[/at]
+[/talk]
+[/manAI]

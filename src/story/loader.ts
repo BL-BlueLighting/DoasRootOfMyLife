@@ -133,6 +133,17 @@ export function loadStory(engine: GameEngine, story: StoryFile): void {
           }
           break;
         }
+        case 'progress': {
+          const targetSwStr = act.max === undefined ? 'unknown' : act.max.toString();
+          const delayStr = act.timeAdd ? act.timeAdd.toString() : 'unknown';
+          engine.echoContent(`[progress max=${targetSwStr} timeAdd=${delayStr}][/progress]`, true);
+          break;
+        }
+        case 'sha256': {
+          const hash = GameEngine.sha256(act.data);
+          engine.echoContent(hash, true);
+          break;
+        }
         case 'ask': {
           await new Promise<void>((resolve) => {
             engine.ask(act.prompt, (response: string) => {
@@ -253,6 +264,9 @@ export function loadStory(engine: GameEngine, story: StoryFile): void {
       }
     }, minSw);
   }
+
+  // Mount hostProxy: real filesystem → virtual ~/hostProxy
+  engine.mountHostProxy();
 }
 
 function getMinSw(reqs: RequireEntry[]): number {

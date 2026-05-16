@@ -2,7 +2,7 @@
 // Converts .doasStory text → StoryFile AST
 
 import {
-  StoryFile, ConditionDef, DirDef, RestrictedDef, FileDef,
+  StoryFile, ChapterMeta, ConditionDef, DirDef, RestrictedDef, FileDef,
   CommandDef, CommandStep, ManAIDef, ManAIStep, WebTryDef,
   TriggerDef, ScriptDef, Action, AskDef, AskHandler, RequireEntry,
 } from './types.js';
@@ -12,6 +12,8 @@ export function parseStory(source: string): StoryFile {
   let pos = 0;
 
   const result: StoryFile = {
+    chapter: undefined,
+    useScript: undefined,
     conditions: [], dirs: [], restricted: [], files: [],
     commands: [], manAIs: [], webTries: [], triggers: [], scripts: [],
   };
@@ -20,19 +22,28 @@ export function parseStory(source: string): StoryFile {
   function advance(): string { return lines[pos++] ?? ''; }
   function eof(): boolean { return pos >= lines.length; }
 
+  // Safety: prevent infinite loops
+  let loopCount = 0;
+  const MAX_LOOP = 10000;
+  function tick(): void {
+    if (++loopCount > MAX_LOOP) throw new Error('Parser stuck: infinite loop detected');
+  }
+
   function skipBlank(): void {
-    while (!eof() && peek().trim() === '') advance();
+    while (!eof() && peek().trim() === '') { tick(); advance(); }
   }
 
   function skipComment(): void {
     while (!eof()) {
+      tick();
       const line = peek();
       const trimmed = line.trimStart();
       if (trimmed.startsWith('+') && !trimmed.startsWith('++')) {
         advance();
       } else if (trimmed.startsWith('++')) {
-        advance(); // opening ++
+        advance();
         while (!eof()) {
+          tick();
           const inner = advance();
           if (inner.trimStart().startsWith('++')) break;
         }
@@ -45,6 +56,7 @@ export function parseStory(source: string): StoryFile {
   function skipJunk(): void {
     let changed = true;
     while (changed) {
+      tick();
       changed = false;
       const before = pos;
       skipBlank();
@@ -62,7 +74,7 @@ export function parseStory(source: string): StoryFile {
   // Read indented content block
   function readBlock(baseIndent: number): string[] {
     const result: string[] = [];
-    while (!eof() && peek().trim() !== '') {
+    while (!eof() && peek().trim() !== '') { tick();
       const line = peek();
       const trimmed = line.trimStart();
       if (trimmed.startsWith('+')) { advance(); continue; }
@@ -85,10 +97,9 @@ export function parseStory(source: string): StoryFile {
   // Parse a section header: [name] or [name key="value"]
   function parseHeader(line: string): { name: string; attrs: Record<string, string> } | null {
     const trimmed = line.trimStart();
-    const m = trimmed.match(/^\[([\w\d]+)(?:\s+(\w+)="([^"]*)")?\]$/);
+    const m = trimmed.match(/^\[([\w\d]+)(.*)\]$/);
     if (!m) return null;
     const attrs: Record<string, string> = {};
-    // re-parse all key="value" pairs
     const attrRe = /(\w+)="([^"]*)"/g;
     let am;
     while ((am = attrRe.exec(trimmed)) !== null) {
@@ -236,6 +247,14 @@ export function parseStory(source: string): StoryFile {
     if (cmd === 'random') {
       return { kind: 'wait', ms: 0 }; // handled in scripts
     }
+    if (cmd === 'progress') {
+      const max = parseInt(rest[0]);
+      const timeAdd = parseInt(rest[1]);
+      return { kind: 'progress', max: max || 0, timeAdd: timeAdd || 0 };
+    }
+    if (cmd === 'sha256') {
+      return { kind: 'sha256', data: rest.join(' ') };
+    }
     return null;
   }
 
@@ -307,6 +326,7 @@ export function parseStory(source: string): StoryFile {
 
   // ---- Main parse loop ----
   while (!eof()) {
+    tick();
     skipJunk();
     if (eof()) break;
 
@@ -321,6 +341,37 @@ export function parseStory(source: string): StoryFile {
     if (!hdr) { advance(); continue; }
 
     switch (hdr.name) {
+      case 'chapter': {
+        advance();
+        const meta: ChapterMeta = { id: '', name: '', description: '', gameId: '' };
+        skipJunk();
+        while (!eof() && !peek().trimStart().startsWith('[/chapter]')) { tick();
+          const cline = peek().trimStart();
+          // Inline values: [id] value
+          if (cline.startsWith('[id]')) { meta.id = cline.slice(4).trim(); advance(); }
+          else if (cline.startsWith('[name]')) { meta.name = cline.slice(6).trim(); advance(); }
+          else if (cline.startsWith('[gameId]')) { meta.gameId = cline.slice(8).trim(); advance(); }
+          else if (cline.startsWith('[description]')) {
+            advance();
+            const descLines: string[] = [];
+            while (!eof() && !peek().trimStart().startsWith('[/description]')) { tick();
+              descLines.push(peek().trimStart());
+              advance();
+            }
+            meta.description = descLines.join('\n');
+            if (peek().trimStart().startsWith('[/description]')) advance();
+          } else { advance(); }
+          skipJunk();
+        }
+        if (peek().trimStart().startsWith('[/chapter]')) advance();
+        result.chapter = meta;
+        break;
+      }
+      case 'useScript': {
+        result.useScript = hdr.attrs['path'] || '';
+        advance();
+        break;
+      }
       case 'condition': {
         const def: ConditionDef = {
           name: hdr.attrs['name'] || '',
@@ -352,7 +403,7 @@ export function parseStory(source: string): StoryFile {
 
         // Read [onRead] and [fileContent]
         skipJunk();
-        while (!eof() && !peek().trimStart().startsWith('[/file]')) {
+        while (!eof() && !peek().trimStart().startsWith('[/file]')) { tick();
           const sec = peek().trimStart();
           if (sec.startsWith('[onRead]')) {
             advance();
@@ -362,7 +413,7 @@ export function parseStory(source: string): StoryFile {
             if (peek().trimStart().startsWith('[/onRead]')) advance();
           } else if (sec.startsWith('[fileContent]')) {
             advance();
-            content.push(...readBlock(indent + 4));
+            content.push(...readBlock(0));
             skipJunk();
             if (peek().trimStart().startsWith('[/fileContent]')) advance();
           } else {
@@ -383,7 +434,7 @@ export function parseStory(source: string): StoryFile {
         const steps: CommandStep[] = [];
 
         skipJunk();
-        while (!eof() && !peek().trimStart().startsWith('[/command]')) {
+        while (!eof() && !peek().trimStart().startsWith('[/command]')) { tick();
           const sec = peek().trimStart();
           if (sec.startsWith('[params]')) {
             advance();
@@ -397,18 +448,19 @@ export function parseStory(source: string): StoryFile {
           } else if (sec.startsWith('[run]')) {
             advance();
             skipJunk();
-            while (!eof() && !peek().trimStart().startsWith('[/run]')) {
+            while (!eof() && !peek().trimStart().startsWith('[/run]')) { tick();
+              const before = pos;
               const step = parseAtBlock();
               if (step) {
                 steps.push(step);
               } else {
-                // Top-level actions inside [run] without [at]
                 const { actions, echo } = parseActions(indent + 4);
                 if (echo.length > 0 || actions.length > 0) {
                   steps.push({ echo, actions, at: undefined });
                 }
               }
               skipJunk();
+              if (pos === before) advance();
             }
             if (peek().trimStart().startsWith('[/run]')) advance();
           } else {
@@ -426,15 +478,15 @@ export function parseStory(source: string): StoryFile {
         const require = parseRequire(indent + 2);
         const steps: ManAIStep[] = [];
         skipJunk();
-        while (!eof() && !peek().trimStart().startsWith('[/manAI]')) {
+        while (!eof() && !peek().trimStart().startsWith('[/manAI]')) { tick();
           const sec = peek().trimStart();
           if (sec.startsWith('[talk]')) {
             advance();
             skipJunk();
-            while (!eof() && !peek().trimStart().startsWith('[/talk]')) {
+            while (!eof() && !peek().trimStart().startsWith('[/talk]')) { tick();
+              const before = pos;
               const step = parseAtBlock();
               if (step) {
-                // Convert CommandStep to ManAIStep
                 steps.push({ at: step.at, atMin: step.atMin, atMax: step.atMax, echo: step.echo, actions: step.actions });
               } else {
                 const { actions, echo } = parseActions(indent + 4);
@@ -443,6 +495,7 @@ export function parseStory(source: string): StoryFile {
                 }
               }
               skipJunk();
+              if (pos === before) advance(); // safety: ensure progress
             }
             if (peek().trimStart().startsWith('[/talk]')) advance();
           } else {
@@ -459,7 +512,7 @@ export function parseStory(source: string): StoryFile {
         let filepath = '';
         advance();
         skipJunk();
-        while (!eof() && !peek().trimStart().startsWith('[/webTry]')) {
+        while (!eof() && !peek().trimStart().startsWith('[/webTry]')) { tick();
           const sec = peek().trimStart();
           if (sec.startsWith('[filepath]')) {
             advance();
@@ -483,7 +536,7 @@ export function parseStory(source: string): StoryFile {
         let trigEcho: string[] = [];
         let trigActions: Action[] = [];
         skipJunk();
-        while (!eof() && !peek().trimStart().startsWith('[/trigger]')) {
+        while (!eof() && !peek().trimStart().startsWith('[/trigger]')) { tick();
           const sec = peek().trimStart();
           if (sec.startsWith('[do]')) {
             advance();
@@ -508,7 +561,7 @@ export function parseStory(source: string): StoryFile {
         advance();
         skipJunk();
         // Read config lines
-        while (!eof() && !peek().trimStart().startsWith('[/script]')) {
+        while (!eof() && !peek().trimStart().startsWith('[/script]')) { tick();
           const cfgLine = peek().trimStart();
           if (cfgLine.includes('=') && !cfgLine.startsWith('[') && !cfgLine.startsWith('+')) {
             const eqIdx = cfgLine.indexOf('=');

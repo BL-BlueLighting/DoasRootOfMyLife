@@ -2,8 +2,12 @@
 // Port of base.js to TypeScript for CLI
 
 import { parseEchoContent, blocksToLines, OutputLine, OutputBlock } from './parser.js';
-import { loadState, saveState, loadAchieves, saveAchieves, loadProfile, saveProfile, SaveData, ProfileData } from './storage.js';
+import { loadState, saveState, loadAchieves, saveAchieves, loadProfile, saveProfile, SaveData, ProfileData, readFile as storageReadFile, writeFile as storageWriteFile } from './storage.js';
 import { webServer } from './webserver.js';
+import * as crypto from 'crypto';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as os from 'os';
 
 export interface CommandAPI {
   args: string[];
@@ -70,6 +74,8 @@ export class GameEngine {
   private asking = false;
   private askCallback: ((response: string) => void) | null = null;
   private echoDelay = 30;
+  public readFile = storageReadFile;
+  public writeFile = storageWriteFile;
 
   // UI callbacks
   private onWrite: WriteLineFn = () => {};
@@ -101,6 +107,12 @@ export class GameEngine {
 
   // Restricted directories (ls/cd will show "Permission denied")
   private restrictedDirs: Set<string> = new Set();
+
+  // HostProxy: mounts ~/.doas-root-of-mylife/files/ → ~/hostProxy in virtual FS
+  private hostProxyMounted = false;
+  private hostProxyRealDir: string;
+  private hostProxyVirtualPath: string;
+
   private panelStatus: PanelStatus = {
     visible: false,
     ip: '127.0.0.1',
@@ -108,6 +120,7 @@ export class GameEngine {
     mem: '739MiB',
     extra: '',
   };
+
 
   constructor(chapterId: string, gameId: string) {
     this.chapterId = chapterId;
@@ -122,6 +135,8 @@ export class GameEngine {
       achieves: [],
       currentDir: '~',
     };
+    this.hostProxyRealDir = path.join(os.homedir(), '.doas-root-of-mylife', 'files');
+    this.hostProxyVirtualPath = '';
 
     // Load global profile
     const profile = loadProfile();
@@ -139,6 +154,10 @@ export class GameEngine {
         this.dirTree[`${homeDir}/projects`] = [];
       }
     }
+
+    // Public file API
+    this.readFile = storageReadFile;
+    this.writeFile = storageWriteFile;
   }
 
   // Wire up UI callbacks
@@ -383,7 +402,12 @@ export class GameEngine {
     const absTarget = target === '~'
       ? `/home/${this.profile.username || 'yourself'}`
       : target;
-    if (!absTarget || !this.dirTree[absTarget]) return [];
+    if (!absTarget) return [];
+    // HostProxy: list real filesystem
+    if (this.isHostProxyPath(absTarget)) {
+      return this.listHostProxy(this.getHostProxySubPath(absTarget));
+    }
+    if (!this.dirTree[absTarget]) return [];
     const entries = [...this.dirTree[absTarget]];
     // Add files from fileContents that match storyWhere
     for (const [filePath, entry] of Object.entries(this.fileContents)) {
@@ -431,6 +455,14 @@ export class GameEngine {
   catFile(rawPath: string): { content: FileContent; entry: FileEntry } | null {
     const resolved = this.resolveFilePath(rawPath);
     if (!resolved) return null;
+    // HostProxy: read from real filesystem
+    if (this.isHostProxyPath(resolved)) {
+      const subPath = this.getHostProxySubPath(resolved);
+      if (!subPath) return null; // can't cat a directory
+      const content = this.readHostProxy(subPath);
+      if (content === null) return null;
+      return { content, entry: { content, storyWhereMin: 0 } };
+    }
     const entry = this.fileContents[resolved];
     if (!entry) return null;
     if (entry.storyWhereMin > this.state.storyWhere) return null;
@@ -465,6 +497,50 @@ export class GameEngine {
 
   isRestrictedDir(absPath: string): boolean {
     return this.restrictedDirs.has(absPath);
+  }
+
+  // ---- HostProxy: mount real ~/.doas-root-of-mylife/files/ → ~/hostProxy ----
+
+  mountHostProxy(): void {
+    if (this.hostProxyMounted) return;
+    this.hostProxyVirtualPath = this.resolveFilePath('~/hostProxy');
+    // Ensure the virtual directory exists
+    if (!this.dirTree[this.hostProxyVirtualPath]) {
+      this.mkdirP(this.hostProxyVirtualPath);
+    }
+    // Ensure the real directory exists
+    if (!fs.existsSync(this.hostProxyRealDir)) {
+      fs.mkdirSync(this.hostProxyRealDir, { recursive: true });
+    }
+    this.hostProxyMounted = true;
+  }
+
+  private isHostProxyPath(absPath: string): boolean {
+    if (!this.hostProxyMounted) return false;
+    return absPath === this.hostProxyVirtualPath || absPath.startsWith(this.hostProxyVirtualPath + '/');
+  }
+
+  private getHostProxySubPath(absPath: string): string {
+    if (absPath === this.hostProxyVirtualPath) return '';
+    return absPath.slice(this.hostProxyVirtualPath.length + 1);
+  }
+
+  private listHostProxy(subPath: string): string[] {
+    const dirPath = subPath
+      ? path.join(this.hostProxyRealDir, subPath)
+      : this.hostProxyRealDir;
+    if (!fs.existsSync(dirPath)) return [];
+    const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+    // Exclude archived_files directory
+    return entries
+      .filter(e => !(e.isDirectory() && e.name === 'archived_files'))
+      .map(e => e.isDirectory() ? e.name + '/' : e.name);
+  }
+
+  private readHostProxy(subPath: string): string | null {
+    // Block access to archived_files
+    if (subPath.includes('archived_files')) return null;
+    return storageReadFile(subPath);
   }
 
   // ---- Echo content ----
@@ -661,6 +737,13 @@ export class GameEngine {
       return;
     }
 
+    // ---- Built-in clear ----
+    if (cmd === 'clear') {
+      this.clear();
+      this.persist();
+      return;
+    }
+
     // ---- Built-in cat ----
     if (cmd === 'cat') {
       const target = tokens[0];
@@ -679,6 +762,24 @@ export class GameEngine {
         }
       } else {
         this.echoContent(result.content);
+      }
+      this.persist();
+      return;
+    }
+
+    // ---- Built-in sha256sum ----
+    if (cmd === 'sha256sum') {
+      const target = tokens[0];
+      if (!target) {
+        this.writeLine({ segments: [{ text: 'sha256sum: missing file operand' }] });
+        this.persist();
+        return;
+      }
+      const hash = this.sha256File(target);
+      if (hash === null) {
+        this.writeLine({ segments: [{ text: `sha256sum: ${target}: No such file or directory` }] });
+      } else {
+        this.writeLine({ segments: [{ text: `${hash}  ${target}` }] });
       }
       this.persist();
       return;
@@ -794,6 +895,26 @@ export class GameEngine {
 
   static base64Decode(str: string): string {
     return Buffer.from(str, 'base64').toString('utf-8');
+  }
+
+  // ---- SHA256 ----
+  static sha256(data: string): string {
+    return crypto.createHash('sha256').update(data, 'utf-8').digest('hex');
+  }
+
+  /** Compute SHA256 of a file. Returns hash string or null if file not found. */
+  sha256File(filePath: string): string | null {
+    const result = this.catFile(filePath);
+    if (!result) return null;
+    let content: string;
+    if (typeof result.content === 'function') {
+      const ret = result.content(this);
+      if (ret instanceof Promise) return null; // async not supported for hash
+      content = ret || '';
+    } else {
+      content = result.content;
+    }
+    return GameEngine.sha256(content);
   }
 
   _goExit(): void {

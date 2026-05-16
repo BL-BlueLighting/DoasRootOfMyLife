@@ -1,0 +1,164 @@
++ ============================================================
++ Chapter: First (第一章 - 探索空间)
++ ============================================================
+
+[chapter]
+[id] first
+[name] 第一章 - 探索空间
+[description]
+放假了，和老朋友 manAI 叙叙旧，学学最简单的 SQL 注入。
+[/description]
+[gameId] 1
+[/chapter]
+
+[useScript path="./first.ts"]
+
++ ============================== CONDITIONS ==============================
+
+[condition name="accessGiven" default=false]
+[condition name="panboxHydraEnable" default=false]
+
++ ============================== FILES ==============================
+
+[file path="~/README.txt"]
+[require]
+storyWhere >= 0
+[onRead]
+/achieve 欢迎来到 Chapter 1！ Easy
+[/onRead]
+[fileContent]
+CHAPTER 1 - 探索空间
+你放假了。你闲来无事，决定进 CLI 模式和 manAI 玩玩。
+老朋友，就只过这么一段时间，你应该没有忘记怎么用 CLI 吧？
+manAI 给你留下了一张纸条：
+    人，如果你看到这张纸条，说明你重新进来了 CLI 模式。
+    如果你来了，就用 manAI 叫我。
+[/file]
+
+[file path="~/sudoerofmyself"]
+[require]
+storyWhere >= 2
+[fileContent]
+Li4uIC4uLSAtLi4uIC4uLiAtLi0uIC4tLiAuLiAtLi4uIC4gLyAtLi4uIC4tLi4gLi0uLS4tIC0uLi4gLi0uLiAuLi0gLiAuLS4uIC4uIC0tLiAuLi4uIC0gLi4gLS4gLS0uIC8gLS4tLS4gLi4tIC4uIC0uLiAtLS0uLi4gLi0tLS0gLi4uLi4gLi4uLS0gLi4uLi0gLS0tLi4gLi4uLi4gLi4tLS0gLi4uLS0gLS0tLi4gLS0tLi4gLS4tLS4tIC8gLS0tIC0uIC8gLS4uLiAuLiAuLS4uIC4uIC0uLi4gLi4gLi0uLiAuLiAtLi0uLS0gLyAuLSAtLiAtLi4gLS0uLi0tIC8gLi0tIC4uLi4gLiAuLS4gLiAvIC4uIC4uLiAvIC0tIC0uLS0gLyAuLi0gLi4gLS4uIC4uLS0uLg==
+[/file]
+
+[file path="~/sudoerofmyself.decrypt"]
+[require]
+storyWhere >= 3
+[fileContent]
+... ..- -... ... -.-. .-. .. -... . / -... .-.. .-.-.- -... .-.. ..- . .-.. .. --. .... - .. -. --. / -.--. ..- .. -.. ---... .---- ..... ...-- ....- ---.. ..... ..--- ...-- ---.. ---.. -.--.- / --- -. / -... .. .-.. .. -... .. .-.. .. -.-.-- / .- -. -.. --..-- / .-- .... . .-. . / .. ... / -- -.-- / ..- .. -.. ..--..
+[/file]
+
++ ============================== manAI DIALOGUE ==============================
+
+[manAI]
+[require]
+storyWhere >= 0
+[talk]
+[at value="0"]
+- echo
+    (-_-) 哪位？
+    (^_^) 你？好久不见！
+    (?_?) 你咋突然想起来找我玩了？
+    你：放假了，无聊。
+    (._.) 那好吧。
+    (+_+) 不知道为什么，即使你苏醒了，各种 CLI 命令还是没有办法完全使用。
+    _(:3 」∠ )_ 估计是我没有那个权限。
+    (✪ω✪) 你应该可以试试看。
+    ! 试试 base64 函数 !
+/sw next
+[/at]
+[at value="1"]
+- echo
+    (qwq) 看来我真的权限好低啊。
+    (awa) 你可不可以给我点权限，不给也行。
+    执行 permission give manAI wheel 来让它获得更多权限。
+    或者，直接继续 manAI 拒绝给它权限。
+/sw 3501
+[/at]
+[at value="3501"]
+- echo
+    (qwq) 好吧。
+    (awa) 不知道谁在文件夹里留了一个文件，你去看看罢。
+/cond set accessGiven be false
+/sw 2
+[/at]
+[at value="3502"]
+- echo
+    (✪ω✪) 谢谢！
+    (awa) 不知道谁在文件夹里留了一个文件，表层是用 base64 解的，我有权限因此就帮你解了。
+/cond set accessGiven be true
+/sw 201
+[/at]
+[at value="4"]
+- echo
+    Σ(*ﾟдﾟﾉ)ﾉ 你这就获得了结果？？？
+    (〒︿〒) 太强了。
+    (awa) 看来我是没办法难住你了。
+    (qwq) 好吧，只能让作者来了。
+    ||%&%$$#$#%&&**!@#$%^&*
+    /-/-////-/-//-/-/|//-///-/|///--/-|--/////------//---//---//////---////----////-----/
+/sw 5
+[/at]
+[at value="501"]
+- echo
+    (q_q) 连作者都没有办法难住你吗。
+    (p_p) 我认输。
+/sw 6
+- echo
+    _(:3 」∠ )_ 彳亍口巴，话说你期末考试成绩怎么样？
+    你：（捏拳头）😡
+    (._.) 看来应该考的不好
+    (|||ﾟдﾟ) 难道你不知道 memory-package-manager 吗
+    你：那是什么？
+    (-_-) 这东西可以从 MPM 源下载知识。
+    (+_+) 你要不要试试？
+    ! 外部消息：去吃饭 !
+    你：我先去吃饭了。
+    ! 如果你不需要吃饭可以继续。 !
+[/at]
+[at value="6"]
+- echo
+    (awa) 吃完饭了？
+    (awa) 你去试试看吧。
+    ! 追加了新的指令：mpm !
+[/at]
+[at value="601"]
+- echo
+    (qwq) 你装了什么啊？
+    (awa) 总之就是你肯定知道怎么用 mpm 了吧。
+    (?w?) 话说回来，你多少岁啊？(留空可以拒绝回复，或者打空格也行。)
+- ask
+    [on empty="true"]
+    - echo
+        (awa) 好吧，看来你有点害羞。
+    /sw 7
+    [/on]
+    [on default="true"]
+    - echo
+        (awa) 哦，原来你这么大了。
+    /sw 7
+    [/on]
+[/at]
+[at value="7"]
+- echo
+    (._.) 在这个世界，虽然只有你和我，但是因为 HumanOS 在人体活跃状态下可以连接到世界网的原因，
+    (._.) 很多恶意的人会试图攻击你的 HumanOS。
+    (+_+) 虽然人类已经进化了数几万年，但是 HumanOS 早就是一坨屎山了。
+    (-_-) 所以，你必须要会拯救自己的 HumanOS 于水火之中，比如 hydra attack 之类的命令。
+    ! 新的命令追加：pandorabox !
+/sw 8
+[/at]
+[at value="1001"]
+- echo
+    (awa) 这是一个虚拟服务器的 IP，试试破解他！
+    ! NEW CRACK: 173.5.5.3 !
+/sw 1002
+[/at]
+[at value="default"]
+- echo
+    (awa) 你也许还没有完成剩下的任务，要不然就是还没写完。
+    (awa) 先完成任务吧。
+[/at]
+[/talk]
+[/manAI]

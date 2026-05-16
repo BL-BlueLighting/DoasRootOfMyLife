@@ -80,3 +80,42 @@ export function saveProfile(profile: ProfileData): void {
   const filePath = path.join(SAVE_DIR, 'profile.json');
   fs.writeFileSync(filePath, JSON.stringify(profile, null, 2), 'utf-8');
 }
+
+// Custom files
+
+export function checkDirectoryOfCustomFiles(): boolean | null {
+  const dirPath = path.join(SAVE_DIR, 'files');
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+    return null;
+  }
+  return true;
+}
+
+export function createDirectoriesFromPath(filePath: string): boolean | null {
+  // split filename and directories
+  const parts = filePath.split('/').filter(p => p);
+  const dirs = parts.slice(0, -1);
+  let currentPath = path.join(SAVE_DIR, 'files');
+  for (const dir of dirs) {
+    currentPath = path.join(currentPath, dir);
+    if (!fs.existsSync(currentPath)) {
+      fs.mkdirSync(currentPath);
+    }
+  }
+  return true;
+}
+
+export function readFile(filePath: string): string | null {
+  checkDirectoryOfCustomFiles();
+  const absPath = path.join(SAVE_DIR, 'files', filePath);
+  if (!fs.existsSync(absPath)) return null;
+  return fs.readFileSync(absPath, 'utf-8');
+}
+
+export function writeFile(filePath: string, content: string): void {
+  checkDirectoryOfCustomFiles();
+  createDirectoriesFromPath(filePath);
+  const absPath = path.join(SAVE_DIR, 'files', filePath);
+  fs.writeFileSync(absPath, content, 'utf-8');
+}

@@ -1,6 +1,8 @@
 // doas story DSL — AST types
 
 export interface StoryFile {
+  chapter?: ChapterMeta;
+  useScript?: string;
   conditions: ConditionDef[];
   dirs: DirDef[];
   restricted: RestrictedDef[];
@@ -10,6 +12,14 @@ export interface StoryFile {
   webTries: WebTryDef[];
   triggers: TriggerDef[];
   scripts: ScriptDef[];
+}
+
+// ---- Chapter metadata ----
+export interface ChapterMeta {
+  id: string;
+  name: string;
+  description: string;
+  gameId: string;
 }
 
 // ---- Condition / Flag ----
@@ -118,6 +128,8 @@ export type Action =
   | { kind: 'help'; text: string }
   | { kind: 'wait'; ms: number }
   | { kind: 'cmdAdd'; name: string; steps: CommandStep[] }
+  | { kind: 'progress'; max: number; timeAdd: number }
+  | { kind: 'sha256'; data: string }
   | { kind: 'ask'; prompt: string; handlers: AskHandler[] };
 
 // ---- Require (condition for visibility) ----

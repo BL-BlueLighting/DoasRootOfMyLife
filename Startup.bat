@@ -14,8 +14,21 @@ if not exist "package.json" (
     exit /b
 )
 
+rem echo blank
+echo.
+
+echo :: Hold on, We are authenticating your identity...
+
+rem wait 1 second
+timeout /t 1 > nul
+
+echo :: Identity authenticated. Starting up...
+
+echo.
 echo :: Entering terminal...
 
+echo.
 npm start --silent
 
 echo Goodbye, the user!
+pause > nul
