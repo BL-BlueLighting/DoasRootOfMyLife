@@ -1,23 +1,16 @@
 {
-  "name": "doas-cli",
+  "name": "doas",
   "type": "module",
-  "version": "1.0.0",
-  "description": "doas -su mylife.root - CLI edition with Ink",
-  "main": "dist/index.js",
+  "version": "1.1.1.0",
+  "description": "doas -su mylife.root",
+  "author": "BL.BlueLighting",
+  "main": "src/index.tsx",
   "scripts": {
-    "build": "tsc",
-    "bundle": "npx ncc build dist/index.mjs --out bundle --minify",
-    "exe": "npx pkg bundle/index.mjs --targets node20-win-x64 --output dist/doas.exe --public",
-    "make": "tsc && npm run bundle && npm run exe",
-    "start": "tsc && node dist/index.js",
-    "dev": "tsc && node dist/index.js"
-  },
-  "pkg": {
-    "assets": [
-      "dist/**/*.js",
-      "public/**/*",
-      "node_modules/**/*"
-    ]
+    "build": "bun build ./src/index.tsx --outfile ./dist/doas.exe --compile --target=bun-windows-x64",
+    "metadata": "node scripts/set-metadata.mjs",
+    "make": "bun run build && bun run metadata",
+    "dev": "bun run src/index.tsx",
+    "start": "bun run src/index.tsx"
   },
   "dependencies": {
     "ink": "^5.0.1",
@@ -27,8 +20,7 @@
   "devDependencies": {
     "@types/node": "^25.7.0",
     "@types/react": "^18.3.0",
-    "@vercel/ncc": "^0.38.4",
-    "@yao-pkg/pkg": "^6.19.0",
-    "typescript": "^5.5.0"
+    "png-to-ico": "^3.0.1",
+    "rcedit": "^5.0.2"
   }
 }

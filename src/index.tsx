@@ -6,11 +6,7 @@ import { GameEngine } from './engine/engine.js';
 import { App } from './components/App.js';
 import { parseStory } from './story/parser.js';
 import { loadStory } from './story/loader.js';
-import { readFileSync, readdirSync } from 'fs';
-import { resolve, dirname, basename } from 'path';
-import { fileURLToPath } from 'url';
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
+import { CHAPTERS, SCRIPT_REGISTRY, ChapterInfo } from './chapters/registry.js';
 
 const BOOT_TEXT = `HumanOS Core v6.15.3
 :: Pulling humand
@@ -58,62 +54,6 @@ const BOOT_TEXT = `HumanOS Core v6.15.3
 [ INFO ] HSIM Work finished.
 
 :: System Initialized. Welcome to HumanOS! ::`;
-
-// ---- Discover chapters from storyFiles/ ----
-
-interface ChapterInfo {
-  id: string;
-  name: string;
-  description: string;
-  gameId: string;
-  storyPath: string;
-  scriptPath: string;
-}
-
-function discoverChapters(): ChapterInfo[] {
-  // Search all candidate dirs for .doasStory files
-  const candidates = [
-    resolve(__dirname, 'chapters', 'storyFiles'),
-    resolve(__dirname, '..', 'src', 'chapters', 'storyFiles'),
-  ];
-
-  const found = new Map<string, { storyPath: string; source: string }>();
-
-  for (const dir of candidates) {
-    let files: string[];
-    try { files = readdirSync(dir); }
-    catch { continue; }
-
-    for (const file of files) {
-      if (!file.endsWith('.doasStory')) continue;
-      const chapterId = basename(file, '.doasStory');
-      if (found.has(chapterId)) continue;
-      const storyPath = resolve(dir, file);
-      let source: string;
-      try { source = readFileSync(storyPath, 'utf-8'); }
-      catch { continue; }
-      found.set(chapterId, { storyPath, source });
-    }
-  }
-
-  const chapters: ChapterInfo[] = [];
-  for (const [chapterId, { storyPath, source }] of found) {
-    const ast = parseStory(source);
-    if (!ast.chapter) continue;
-
-    chapters.push({
-      id: ast.chapter.id || chapterId,
-      name: ast.chapter.name || chapterId,
-      description: ast.chapter.description || '',
-      gameId: ast.chapter.gameId || chapterId,
-      storyPath,
-      scriptPath: `./chapters/storyFiles/${chapterId}.js`,
-    });
-  }
-  return chapters;
-}
-
-const CHAPTERS = discoverChapters();
 
 // ---- Chapter Menu ----
 
@@ -168,19 +108,14 @@ function Main() {
       const eng = new GameEngine(ch.id, ch.gameId);
       eng.load();
 
-      // Parse the chapter's .doasStory
-      const source = readFileSync(ch.storyPath, 'utf-8');
-      const ast = parseStory(source);
+      // Parse the embedded .doasStory content
+      const ast = parseStory(ch.storySource);
       loadStory(eng, ast);
 
-      // Dynamically import the chapter's script file
-      try {
-        const scripts = await import(ch.scriptPath);
-        if (scripts.registerScripts) {
-          scripts.registerScripts(eng);
-        }
-      } catch {
-        // No scripts for this chapter — that's fine
+      // Register chapter scripts from static registry
+      const registerFn = SCRIPT_REGISTRY.get(ch.id);
+      if (registerFn) {
+        registerFn(eng);
       }
 
       eng.echoContent('Welcome to HumanOS.', true);
