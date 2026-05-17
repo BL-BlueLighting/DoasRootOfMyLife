@@ -18,7 +18,7 @@ if (!existsSync(exePath)) {
   process.exit(1);
 }
 
-const VERSION = '1.1.1.0';
+const VERSION = '1.1.1.3';
 
 // Step 1: Embed version strings
 console.log('Embedding version strings...');

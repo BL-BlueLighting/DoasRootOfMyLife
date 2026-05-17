@@ -77,6 +77,13 @@ export class GameEngine {
   public readFile = storageReadFile;
   public writeFile = storageWriteFile;
 
+  // Story conditions (shared with loader so cheat commands can modify them)
+  public conditions = new Map<string, boolean | number | string>();
+
+  // Cheat system
+  private cheatActive = false;
+  private originalStoryWhere: number | null = null;
+
   // UI callbacks
   private onWrite: WriteLineFn = () => {};
   private onAsk: AskFn = () => {};
@@ -158,6 +165,126 @@ export class GameEngine {
     // Public file API
     this.readFile = storageReadFile;
     this.writeFile = storageWriteFile;
+
+    // Check for cheat activation file
+    this.checkDevelopFile();
+    this.registerCheatCommand();
+  }
+
+  // ---- Cheat system ----
+
+  checkDevelopFile(): void {
+    const developPath = path.join(os.homedir(), '.doas-root-of-mylife', '.develop');
+    this.cheatActive = fs.existsSync(developPath);
+  }
+
+  get isCheatActive(): boolean { return this.cheatActive; }
+
+  private registerCheatCommand(): void {
+    this.newCommand('/cheat', ['subcommand', 'arg1', 'arg2', 'arg3'], (api) => {
+      if (!this.cheatActive) {
+        api.echo('/CHEAT: .develop file not found. Cheat mode is disabled.', true);
+        return;
+      }
+
+      const sub = api.args[0];
+      const a1 = api.args[1];
+      const a2 = api.args[2];
+      const rest = api.args.slice(3).join(' ');
+
+      if (sub === 'set' && (a1 === 'storyWhere' || a1 === 'storywhere')) {
+        const val = parseInt(a2, 10);
+        if (isNaN(val)) {
+          api.echo('/CHEAT: Invalid storyWhere value.', true);
+          return;
+        }
+        if (this.originalStoryWhere === null) {
+          this.originalStoryWhere = this.state.storyWhere;
+        }
+        this.state.storyWhere = val;
+        api.echo(`/CHEAT: storyWhere set to ${val} (original saved: ${this.originalStoryWhere}).`, true);
+        return;
+      }
+
+      if (sub === 'open') {
+        if (a1 === 'webTry' || a1 === 'webtry') {
+          const pageId = a2 || '1004';
+          this.loadWebTry(pageId);
+          api.echo(`/CHEAT: Opening webTry page: ${pageId}`, true);
+          return;
+        }
+        if (a1 === 'capturer') {
+          this.loadCapturer('127.0.0.1', 'Cheat', a2 || '');
+          api.echo(`/CHEAT: Opening capturer.`, true);
+          return;
+        }
+      }
+
+      if (sub === 'set' && a1 === 'custom') {
+        if (!a2) {
+          api.echo('/CHEAT: Missing condition name. Usage: /cheat set custom <name> <value>', true);
+          return;
+        }
+        this.conditions.set(a2, rest);
+        api.echo(`/CHEAT: Condition '${a2}' set to '${rest}'.`, true);
+        return;
+      }
+
+      if (sub === 'view') {
+        if (a1 === 'webtry' || a1 === 'webtries') {
+          const pages = webServer.listWebTryPages();
+          if (pages.length === 0) {
+            api.echo('/CHEAT: No webtry pages available.', true);
+          } else {
+            api.echo(`/CHEAT: WebTry pages (${pages.length}):`, true);
+            for (const id of pages) {
+              api.echo(`  ${id}.html`, true);
+            }
+          }
+          return;
+        }
+        if (a1 === 'capturer') {
+          const cd = webServer.getCapturerData();
+          api.echo('/CHEAT: Capturer data:', true);
+          api.echo(`  IP:     ${cd.ip || '(none)'}`, true);
+          api.echo(`  Sender: ${cd.sender || '(none)'}`, true);
+          api.echo(`  More:   ${cd.more || '(none)'}`, true);
+          return;
+        }
+        // Default: view all state
+        api.echo('/CHEAT — Current state:', true);
+        api.echo(`  storyWhere:  ${this.state.storyWhere} (original: ${this.originalStoryWhere ?? 'N/A'})`, true);
+        api.echo(`  cheatActive: ${this.cheatActive}`, true);
+        api.echo(`  chapterId:   ${this.chapterId}`, true);
+        api.echo(`  currentDir:  ${this.state.currentDir}`, true);
+        if (this.conditions.size > 0) {
+          api.echo('  Conditions:', true);
+          for (const [k, v] of this.conditions) {
+            api.echo(`    ${k} = ${v}`, true);
+          }
+        }
+        const pages = webServer.listWebTryPages();
+        api.echo(`  WebTry pages: ${pages.length > 0 ? pages.join(', ') : '(none)'}`, true);
+        return;
+      }
+
+      if (sub === 'reboot') {
+        api.echo('/CHEAT: Rebooting program...', true);
+        setTimeout(() => this._goExit(), 500);
+        return;
+      }
+
+      // Help
+      api.echo('/CHEAT — Available subcommands:', true);
+      api.echo('  /cheat view                          (show all current state)', true);
+      api.echo('  /cheat view webtries                 (list all webtry pages)', true);
+      api.echo('  /cheat view capturer                 (show capturer data)', true);
+      api.echo('  /cheat set storyWhere <number>       (saves original, sets new)', true);
+      api.echo('  /cheat open webTry <pageId>          (open webtry page)', true);
+      api.echo('  /cheat open capturer <pageId>        (open capturer)', true);
+      api.echo('  /cheat set custom <name> <value>     (set story condition)', true);
+      api.echo('  /cheat reboot                        (restart program)', true);
+    }, 0);
   }
 
   // Wire up UI callbacks
@@ -315,6 +442,8 @@ export class GameEngine {
       this.dirTree[`${homeDir}/downloads`] = [];
       this.dirTree[`${homeDir}/projects`] = [];
     }
+    // Re-mount hostProxy in case the home path changed
+    this.mountHostProxy();
   }
 
   // Move files from old home dir to new home dir after profile name change
@@ -502,8 +631,13 @@ export class GameEngine {
   // ---- HostProxy: mount real ~/.doas-root-of-mylife/files/ → ~/hostProxy ----
 
   mountHostProxy(): void {
+    // Always re-resolve in case the profile (home path) has changed
+    const newPath = this.resolveFilePath('~/hostProxy');
+    if (newPath !== this.hostProxyVirtualPath) {
+      this.hostProxyVirtualPath = newPath;
+      this.hostProxyMounted = false;
+    }
     if (this.hostProxyMounted) return;
-    this.hostProxyVirtualPath = this.resolveFilePath('~/hostProxy');
     // Ensure the virtual directory exists
     if (!this.dirTree[this.hostProxyVirtualPath]) {
       this.mkdirP(this.hostProxyVirtualPath);

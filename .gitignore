@@ -28,3 +28,6 @@ npm-debug.log*
 .claude
 .claude/*
 *.claude
+
+# Bun build
+*.bun-build

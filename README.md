@@ -5,10 +5,11 @@
 </div>
 
 # 注意
-注意，目前 main branch 为 node.js (即 React Ink) 版 CLI，功能不完整，
+~~注意，目前 main branch 为 node.js (即 React Ink) 版 CLI，功能不完整，
 需手动 start up。
 若您希望游玩，先下载本仓库，然后参照 <a href="./development.md">开发教程</a> 部署并启动。
-若您不想 start up，请查看 old 分支。
+若您不想 start up，请查看 old 分支。~~
+好了，用 Bun 打包完了，可以在 Releases 里下载了，直接运行就行。
 
 # 目前进度
 - 序章：开发完成，剧情就是普通拯救自己；

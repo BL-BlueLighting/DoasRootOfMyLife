@@ -68,6 +68,16 @@ export class WebServer {
     return { ...this.capturerData };
   }
 
+  /** List available webtry page IDs (excludes framework pages). */
+  listWebTryPages(): string[] {
+    const ids: string[] = [];
+    for (const [path] of STATIC_FILES) {
+      if (path === '/webtry.html' || path === '/capturer.html') continue;
+      ids.push(path.replace(/^\//, '').replace(/\.html$/, ''));
+    }
+    return ids;
+  }
+
   setContact(key: string, value: string): void {
     this.contactStore.set(key, value);
   }

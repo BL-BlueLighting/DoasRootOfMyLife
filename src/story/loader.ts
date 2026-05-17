@@ -7,12 +7,10 @@ import {
 } from './types.js';
 
 export function loadStory(engine: GameEngine, story: StoryFile): void {
-  // Runtime condition flags
-  const flags = new Map<string, boolean | number | string>();
-
-  // Init conditions
+  // Runtime condition flags — stored on engine so cheat commands can modify them
+  engine.conditions.clear();
   for (const cond of story.conditions) {
-    flags.set(cond.name, cond.default);
+    engine.conditions.set(cond.name, cond.default);
   }
 
   // ---- Helpers ----
@@ -32,7 +30,7 @@ export function loadStory(engine: GameEngine, story: StoryFile): void {
           default: if (!(sw >= val)) return false; break;
         }
       } else if (r.type === 'condition') {
-        const f = flags.get(r.name ?? '');
+        const f = engine.conditions.get(r.name ?? '');
         if (!f) return false;
       }
     }
@@ -77,7 +75,7 @@ export function loadStory(engine: GameEngine, story: StoryFile): void {
           else engine.storyWhere = act.value;
           break;
         case 'cond':
-          flags.set(act.name, act.value);
+          engine.conditions.set(act.name, act.value);
           break;
         case 'trig':
           await runTrigger(act.name);
@@ -223,7 +221,7 @@ export function loadStory(engine: GameEngine, story: StoryFile): void {
     engine.newCommand(cmd.name, cmd.params, async (api) => {
       // Check condition requirements
       for (const r of condReqs) {
-        if (r.name && !flags.get(r.name)) {
+        if (r.name && !engine.conditions.get(r.name)) {
           engine.echoContent('很抱歉，该命令暂时未被启动。', true);
           return;
         }
@@ -251,7 +249,7 @@ export function loadStory(engine: GameEngine, story: StoryFile): void {
     engine.newCommand('manAI', [], async () => {
       // Check condition requirements
       for (const r of condReqs) {
-        if (r.name && !flags.get(r.name)) {
+        if (r.name && !engine.conditions.get(r.name)) {
           engine.echoContent('很抱歉，manAI 暂时未被启动。', true);
           return;
         }
