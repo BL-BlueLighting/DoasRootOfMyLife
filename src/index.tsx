@@ -4,9 +4,9 @@ import React, { useState } from 'react';
 import { render, Box, Text, useInput } from 'ink';
 import { GameEngine } from './engine/engine.js';
 import { App } from './components/App.js';
-import { parseStory } from './story/parser.js';
-import { loadStory } from './story/loader.js';
-import { CHAPTERS, SCRIPT_REGISTRY, ChapterInfo } from './chapters/registry.js';
+import { registerPreChapter } from './chapters/pre.js';
+import { registerFirstChapter } from './chapters/first.js';
+import { registerSecondChapter } from './chapters/second.js';
 
 const BOOT_TEXT = `HumanOS Core v6.15.3
 :: Pulling humand
@@ -55,15 +55,51 @@ const BOOT_TEXT = `HumanOS Core v6.15.3
 
 :: System Initialized. Welcome to HumanOS! ::`;
 
-// ---- Chapter Menu ----
+interface ChapterInfo {
+  id: string;
+  name: string;
+  description: string;
+  gameId: string;
+  register: (engine: GameEngine) => void;
+}
 
-function ChapterMenu({ onSelect }: { onSelect: (ch: ChapterInfo) => void }) {
+const CHAPTERS: ChapterInfo[] = [
+  {
+    id: 'pre',
+    name: '序章 - 意外而来',
+    description: '你从昏迷中醒来，发现自己处于 Emergency Mode (应急恢复模式，又称 CLI Mode)，与 manAI 拯救你自己。',
+    gameId: 'pre',
+    register: registerPreChapter,
+  },
+  {
+    id: 'first',
+    name: '第一章 - 探索空间',
+    description: '放假了，和老朋友 manAI 叙叙旧，学学最简单的 SQL 注入。',
+    gameId: '1',
+    register: registerFirstChapter,
+  },
+  {
+    id: 'second',
+    name: '第二章 - 核心损坏: manAI',
+    description: 'manAI 核心损坏，你需要学会独自修复它。',
+    gameId: '2',
+    register: registerSecondChapter,
+  },
+];
+
+function ChapterMenu({ onSelect }: { onSelect: (chapter: ChapterInfo) => void }) {
   const [selected, setSelected] = useState(0);
 
   useInput((_input, key) => {
-    if (key.upArrow) setSelected((prev) => (prev - 1 + CHAPTERS.length) % CHAPTERS.length);
-    if (key.downArrow) setSelected((prev) => (prev + 1) % CHAPTERS.length);
-    if (key.return) onSelect(CHAPTERS[selected]);
+    if (key.upArrow) {
+      setSelected((prev) => (prev - 1 + CHAPTERS.length) % CHAPTERS.length);
+    }
+    if (key.downArrow) {
+      setSelected((prev) => (prev + 1) % CHAPTERS.length);
+    }
+    if (key.return) {
+      onSelect(CHAPTERS[selected]);
+    }
   });
 
   return (
@@ -95,58 +131,31 @@ function ChapterMenu({ onSelect }: { onSelect: (ch: ChapterInfo) => void }) {
   );
 }
 
-// ---- Main ----
-
 function Main() {
   const [chapter, setChapter] = useState<ChapterInfo | null>(null);
   const [engine, setEngine] = useState<GameEngine | null>(null);
-  const [loading, setLoading] = useState(false);
 
-  const handleSelect = async (ch: ChapterInfo) => {
-    setLoading(true);
-    try {
-      const eng = new GameEngine(ch.id, ch.gameId);
-      eng.load();
-
-      // Parse the embedded .doasStory content
-      const ast = parseStory(ch.storySource);
-      loadStory(eng, ast);
-
-      // Register chapter scripts from static registry
-      const registerFn = SCRIPT_REGISTRY.get(ch.id);
-      if (registerFn) {
-        registerFn(eng);
-      }
-
-      eng.echoContent('Welcome to HumanOS.', true);
-      eng.echoContent('Type [color: #0f0]help[/endcolor] to get started.', true);
-      eng.persist();
-
-      setEngine(eng);
-      setChapter(ch);
-    } catch (err) {
-      console.error('Failed to load chapter:', err);
-    }
-    setLoading(false);
+  const handleSelect = (ch: ChapterInfo) => {
+    const eng = new GameEngine(ch.id, ch.gameId);
+    setEngine(eng);
+    setChapter(ch);
   };
 
-  if (loading) {
-    return (
-      <Box flexDirection="column" padding={1}>
-        <Text color="#00ff66">Loading chapter...</Text>
-      </Box>
-    );
-  }
-
+  // Show chapter menu
   if (!chapter || !engine) {
     return <ChapterMenu onSelect={handleSelect} />;
   }
+
+  // Register chapter commands and show boot + game
+  chapter.register(engine);
 
   return (
     <App
       engine={engine}
       bootText={BOOT_TEXT}
-      onBootComplete={() => {}}
+      onBootComplete={() => {
+        // Boot done, game is ready
+      }}
     />
   );
 }

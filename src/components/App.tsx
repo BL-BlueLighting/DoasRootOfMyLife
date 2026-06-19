@@ -18,8 +18,6 @@ export function App({ engine, bootText, onBootComplete }: AppProps) {
   const [showBoot, setShowBoot] = useState(true);
   const [bootLines, setBootLines] = useState<string[]>([]);
   const [bootDone, setBootDone] = useState(false);
-  const [profileReady, setProfileReady] = useState(false);
-  const [prompt, setPrompt] = useState('yourself@humanos:~$ ');
   const [panel, setPanel] = useState<PanelStatus>({
     visible: false, ip: '127.0.0.1', ports: '22', mem: '739MiB', extra: '',
   });
@@ -46,21 +44,13 @@ export function App({ engine, bootText, onBootComplete }: AppProps) {
     return () => clearInterval(timer);
   }, [bootText, onBootComplete]);
 
-  // ---- Profile init after boot ----
-  useEffect(() => {
-    if (!bootDone) return;
-    engine.ensureProfile().then(() => {
-      setProfileReady(true);
-    });
-  }, [bootDone, engine]);
-
   // ---- Wire engine callbacks ----
   useEffect(() => {
     engine.setCallbacks(
       (line: OutputLine) => {
         setLines(prev => [...prev, line]);
       },
-      (_askPrompt: string, cb: (response: string) => void) => {
+      (_prompt: string, cb: (response: string) => void) => {
         askCb.current = cb;
         setLocked(false);
       },
@@ -76,16 +66,12 @@ export function App({ engine, bootText, onBootComplete }: AppProps) {
       (status: PanelStatus) => {
         setPanel({ ...status });
       },
-      (newPrompt: string) => {
-        setPrompt(newPrompt);
-      },
     );
   }, [engine]);
 
   // ---- Input handling ----
   useInput((inputVal, key) => {
     if (showBoot && !bootDone) return;
-    if (!profileReady && !askCb.current) return; // Block until profile init done, unless in ask mode
 
     // Handle ask mode
     if (askCb.current) {
@@ -94,14 +80,6 @@ export function App({ engine, bootText, onBootComplete }: AppProps) {
         askCb.current = null;
         setInput('');
         cb(input);
-        return;
-      }
-      if (key.backspace || key.delete) {
-        setInput(prev => prev.slice(0, -1));
-        return;
-      }
-      if (inputVal && !key.ctrl && !key.meta && !key.tab && !key.escape) {
-        setInput(prev => prev + inputVal);
       }
       return;
     }
@@ -189,7 +167,7 @@ export function App({ engine, bootText, onBootComplete }: AppProps) {
           {visibleLines.map((line, i) => (
             <Text key={i}>
               {line.segments.map((seg, j) => (
-                <Text key={j} color={seg.color || '#ffffff'}>{seg.text}</Text>
+                <Text key={j} color={seg.color || '#888888'}>{seg.text}</Text>
               ))}
             </Text>
           ))}
@@ -197,7 +175,7 @@ export function App({ engine, bootText, onBootComplete }: AppProps) {
 
         {/* Input line */}
         <Box flexDirection="row">
-          <Text color="#00ff66">{prompt}</Text>
+          <Text color="#00ff66">yourself@humanos, ~, $ </Text>
           {locked ? (
             <Text color="#888">== Performing uninterruptable tasks. ==</Text>
           ) : (

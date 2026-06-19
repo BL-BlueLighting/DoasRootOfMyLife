@@ -1,11 +1,23 @@
 @echo off
-echo doas -su mylife.root
-echo :: Welcome user.
+echo DoasRootOfMylife
+echo Hold down... We are launching...
 
 rem check requirements
 if not exist "node_modules" (
     echo Installing requirements...
     npm install
+)
+
+rem check if node is installed
+if not defined NODE_PATH (
+    echo Node.js is not installed. Please install Node.js and try again.
+    exit /b
+)
+
+rem check if npm is installed
+if not defined npm (
+    echo npm is not installed. Please install npm and try again.
+    exit /b
 )
 
 rem check if package.json exists
@@ -14,21 +26,8 @@ if not exist "package.json" (
     exit /b
 )
 
-rem echo blank
-echo.
+echo All requirements are met. Starting the application...
 
-echo :: Hold on, We are authenticating your identity...
-
-rem wait 1 second
-timeout /t 1 > nul
-
-echo :: Identity authenticated. Starting up...
-
-echo.
-echo :: Entering terminal...
-
-echo.
-npm start --silent
+npm start
 
 echo Goodbye, the user!
-pause > nul
